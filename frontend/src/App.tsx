@@ -7,8 +7,8 @@ function App() {
       {/* Navbar */}
       <nav className="fixed w-full z-50 top-0 bg-coca-black/80 backdrop-blur-md border-b border-coca-red/20">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-coca-red tracking-widest uppercase">
-            Coca-Cola
+          <div className='Logo'>
+            <img src="/src/assets/logo2.png" alt="Coca-cola" style={{ width: '150px', height: 'auto' }}/>
           </div>
           <div className="hidden md:flex gap-8 text-sm font-medium tracking-wide">
             <a href="#hero" className="hover:text-coca-red transition-colors">Inicio</a>
@@ -16,9 +16,12 @@ function App() {
             <a href="#pouring" className="hover:text-coca-red transition-colors">Experiencia</a>
             <a href="#cta" className="hover:text-coca-red transition-colors">Mayoristas</a>
           </div>
-          <button className="bg-coca-red hover:bg-red-700 text-white px-6 py-2 rounded-full font-bold transition-all transform hover:scale-105">
-            Únete
-          </button>
+            <a href="https://www.coca-colacompany.com/" target='_blank' rel='noopener noreferrer'>
+                <button className="bg-coca-red hover:bg-red-700 text-white px-6 py-2 rounded-full font-bold transition-all transform hover:scale-105">
+                  Únete
+                </button>         
+            </a>
+            
         </div>
       </nav>
 
