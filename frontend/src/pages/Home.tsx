@@ -1,24 +1,16 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback, useState} from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
 import tapChapaMp4 from '../assets/video_secciones/Tap_Chapa.mp4';
+import calles from '../assets/calles/calle1sma.png';
+import calles2 from '../assets/calles/calle2sma.png';
 
-// ─── Configuración de la secuencia de frames ───
-const FRAME_COUNT = 146; // 0.webp → 145.webp
-const FRAME_PATH = '/frames/coca-zero/'; // Desde /public
+const FRAME_COUNT = 146;
+const FRAME_PATH = '/frames/coca-zero/';
 
-/**
- * Componente reutilizable: Scroll-driven Canvas Frame Sequence
- * Técnica inspirada en las páginas de Apple (iPhone, MacBook Pro).
- * 
- * En lugar de un video MP4 (que depende del decodificador del navegador
- * y genera tirones al hacer seek aleatorio), se precargan imágenes
- * individuales en memoria y se dibujan en un <canvas> con
- * requestAnimationFrame — garantizando fluidez absoluta.
- */
 export default function Home() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,20 +18,20 @@ export default function Home() {
   const frameIndexRef = useRef({ value: 0 });
   const tapChapaVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Estado para la interactividad de la chapa
+  const pouringSectionRef = useRef<HTMLDivElement>(null);
+  const beforeImgContainerRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
+
   const [isChapaSpinning, setIsChapaSpinning] = useState(false);
 
   const handleChapaClick = () => {
     if (!tapChapaVideoRef.current || isChapaSpinning) return;
-    
-    // Reproducimos una sola vez a 2x de velocidad desde el inicio
     setIsChapaSpinning(true);
     tapChapaVideoRef.current.playbackRate = 2.0;
     tapChapaVideoRef.current.currentTime = 0;
     tapChapaVideoRef.current.play();
   };
 
-  // Dibuja el frame actual en el canvas, ajustando resolución y aspect ratio
   const renderFrame = useCallback((index: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -49,7 +41,6 @@ export default function Home() {
     const img = imagesRef.current[index];
     if (!img || !img.complete) return;
 
-    // Ajustar resolución del canvas al tamaño real del viewport
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
@@ -60,7 +51,6 @@ export default function Home() {
       ctx.scale(dpr, dpr);
     }
 
-    // Cover: calcular dimensiones para que la imagen cubra todo el canvas sin distorsión
     const imgRatio = img.naturalWidth / img.naturalHeight;
     const canvasRatio = w / h;
     let drawW: number, drawH: number, drawX: number, drawY: number;
@@ -82,10 +72,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    // ─── Paso 1: Precargar TODAS las imágenes en memoria ───
+    // Precargar frames del canvas
     const images: HTMLImageElement[] = [];
     let loadedCount = 0;
 
@@ -94,34 +81,70 @@ export default function Home() {
       img.src = `${FRAME_PATH}${i}.webp`;
       img.onload = () => {
         loadedCount++;
-        // Cuando la primera imagen carga, renderizamos para que no se vea negro
         if (i === 0) renderFrame(0);
-        // Cuando todas cargan, re-renderizamos el frame actual por si acaso
         if (loadedCount === FRAME_COUNT) renderFrame(frameIndexRef.current.value);
       };
       images[i] = img;
     }
     imagesRef.current = images;
 
-    // ─── Paso 2: GSAP ScrollTrigger anima el índice de frame ───
+    // ── Fix: gsap.context recibe UN solo elemento, no un array ──
     const ctx = gsap.context(() => {
+
+      // Animación canvas frame sequence
       gsap.to(frameIndexRef.current, {
-        value: FRAME_COUNT - 1, // Del frame 0 al 145
+        value: FRAME_COUNT - 1,
         ease: 'none',
-        snap: 1, // Siempre enteros — no hay "frame 23.7"
+        snap: 1,
         scrollTrigger: {
-          trigger: scrollContainer,
+          trigger: scrollContainerRef.current,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.5, // Suavizado mínimo para que sea responsive pero no brusco
+          scrub: 0.5,
         },
         onUpdate: () => {
           renderFrame(Math.round(frameIndexRef.current.value));
         },
       });
-    }, scrollContainerRef);
 
-    // ─── Paso 3: Re-dibujar al redimensionar la ventana ───
+      // ── Fix: Slider de calles corregido ──
+      const pouringEl = pouringSectionRef.current;
+      const beforeEl = beforeImgContainerRef.current;
+      const handleEl = handleRef.current;
+
+      if (pouringEl && beforeEl && handleEl) {
+
+        // Fix: Reseteamos estilos iniciales correctamente via GSAP
+        gsap.set(handleEl, { left: '0%' });
+        gsap.set(beforeEl, { clipPath: 'inset(0% 100% 0% 0%)' }); // ← Fix clave: inset es más confiable que polygon para revelar de izquierda a derecha
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: pouringEl,
+            start: 'top top',
+            end: '+=1500',
+            scrub: 0.5,
+            pin: true,
+            anticipatePin: 1,
+          }
+        });
+
+        // Mueve el handle de 0% a 100%
+        tl.to(handleEl, {
+          left: '100%',
+          ease: 'none',
+        }, 0);
+
+        // Fix: usa inset() en vez de polygon() para el clip-path
+        // inset(top right bottom left) → reducimos el lado derecho de 100% a 0%
+        tl.to(beforeEl, {
+          clipPath: 'inset(0% 0% 0% 0%)', // revela completamente la imagen superior
+          ease: 'none',
+        }, 0);
+      }
+
+    }, scrollContainerRef); // ← Fix: solo un ref como scope
+
     const handleResize = () => {
       renderFrame(Math.round(frameIndexRef.current.value));
     };
@@ -151,7 +174,7 @@ export default function Home() {
       </section>
 
       {/* Interactive Tap Chapa Section */}
-      <section 
+      <section
         className="relative h-screen w-full flex items-center justify-center bg-black overflow-hidden cursor-pointer"
         onClick={handleChapaClick}
       >
@@ -163,19 +186,18 @@ export default function Home() {
           playsInline
           onEnded={() => setIsChapaSpinning(false)}
         />
-
-        <div className="absolute inset-0 bg-black/40 pointer-events-none transition-opacity duration-500" style={{ opacity: isChapaSpinning ? 0 : 0.4 }} />
-
-        {/* Indicador de Click reposicionado más abajo */}
+        <div
+          className="absolute inset-0 bg-black/40 pointer-events-none transition-opacity duration-500"
+          style={{ opacity: isChapaSpinning ? 0 : 0.4 }}
+        />
         <div className="absolute bottom-32 right-12 z-20 flex flex-col items-center animate-bounce pointer-events-none">
-          <svg className="w-12 h-12 text-coca-red mb-2 drop-shadow-[0_0_8px_rgba(244,0,0,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-12 h-12 text-coca-red mb-2 drop-shadow-[0_0_8px_rgba(244,0,0,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
           </svg>
           <span className="text-white font-bold text-sm uppercase tracking-widest bg-black/50 px-3 py-1 rounded-full border border-coca-red">
             CLICKEAME
           </span>
         </div>
-
         <div className="relative z-10 flex flex-col items-center justify-center text-center pointer-events-none mt-64">
           <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight drop-shadow-md">
             DESTAPA LA <span className="text-coca-red">MAGIA</span>
@@ -183,13 +205,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/*
-        Transition Section — Canvas Frame Sequence (estilo Apple)
-        ┌─ div (400vh) ← scroll container
-        │   └─ div.sticky (100vh) ← se fija al viewport
-        │       └─ canvas ← dibuja el frame correspondiente al progreso del scroll
-        └─ [al llegar al final, el canvas muestra el último frame y la sección se libera]
-      */}
+      {/* Transition Section — Canvas Frame Sequence */}
       <div
         ref={scrollContainerRef}
         id="transition"
@@ -197,25 +213,57 @@ export default function Home() {
         style={{ height: '400vh' }}
       >
         <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full"
-          />
+          <canvas ref={canvasRef} className="w-full h-full" />
         </div>
       </div>
 
-      {/* Pouring Section */}
+      {/* Pouring Section — Slider de Calles */}
       <section
+        ref={pouringSectionRef}
         id="pouring"
-        className="relative h-screen w-full flex items-center justify-center bg-coca-black"
+        className="relative h-screen w-full bg-black overflow-hidden flex items-center justify-center"
       >
-        <div className="absolute inset-0 border-8 border-dashed border-coca-red/30 m-8 rounded-3xl flex flex-col items-center justify-center text-center">
-          <h2 className="text-4xl md:text-6xl font-black mb-6 text-coca-white tracking-tight">
-            REFRESCANTE <span className="text-coca-red">HASTA LA ÚLTIMA GOTA</span>
-          </h2>
-          <p className="text-lg md:text-2xl text-gray-300 max-w-2xl px-4 font-medium">
-            [Animación de Scroll: Botella de vidrio inclinándose y sirviendo gaseosa espumante sobre hielo]
-          </p>
+        <div className="relative w-full h-full overflow-hidden shadow-2xl select-none">
+
+          {/* Imagen base: Calle limpia */}
+          <img
+            src={calles2}
+            alt="Calle Barranco Limpia"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          />
+
+          {/* Imagen superior: Calle Coca-Cola — revelada por clip-path */}
+          <div
+            ref={beforeImgContainerRef}
+            className="absolute inset-0 z-10 pointer-events-none"
+            // Fix: style inicial aquí también por si GSAP tarda en montar
+            style={{ clipPath: 'inset(0% 100% 0% 0%)' }}
+          >
+            <img
+              src={calles}
+              alt="Calle Barranco Coca Cola"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Handle — Fix: quitamos el translateX del style inline, GSAP lo maneja */}
+          <div
+            ref={handleRef}
+            className="absolute top-0 bottom-0 w-1 bg-white z-20 flex items-center justify-center"
+            style={{ left: '0%' }}
+          >
+            <div className="w-10 h-10 bg-white rounded-full shadow-xl flex items-center justify-between px-2 text-black border border-gray-300 pointer-events-none">
+              <span className="font-bold text-xs">◀</span>
+              <span className="font-bold text-xs">▶</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none text-center p-4">
+            <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+              Transformando <br />
+              <span className="text-coca-red">Espacios</span>
+            </h2>
         </div>
       </section>
 
@@ -233,36 +281,20 @@ export default function Home() {
             <span className="font-bold text-coca-red bg-red-100 px-2 rounded">12% de descuento</span>{' '}
             en tu primera compra al por mayor.
           </p>
-
           <form className="flex flex-col gap-4 max-w-md mx-auto text-left">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">Nombre de la Tienda</label>
-              <input
-                type="text"
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all"
-                placeholder="Mi Bodega Ejemplar"
-              />
+              <input type="text" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all" placeholder="Mi Bodega Ejemplar" />
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">Correo Electrónico</label>
-              <input
-                type="email"
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all"
-                placeholder="contacto@mibodega.com"
-              />
+              <input type="email" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all" placeholder="contacto@mibodega.com" />
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">Teléfono</label>
-              <input
-                type="tel"
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all"
-                placeholder="+51 987 654 321"
-              />
+              <input type="tel" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all" placeholder="+51 987 654 321" />
             </div>
-            <button
-              type="button"
-              className="mt-4 bg-coca-red hover:bg-red-700 text-white font-bold text-lg py-4 rounded-xl transition-all transform hover:scale-105 shadow-lg"
-            >
+            <button type="button" className="mt-4 bg-coca-red hover:bg-red-700 text-white font-bold text-lg py-4 rounded-xl transition-all transform hover:scale-105 shadow-lg">
               Solicitar Contacto y Descuento
             </button>
           </form>

@@ -12,6 +12,7 @@
     "install:all": "npm install"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@react-three/fiber": "^9.6.1",
     "@types/three": "^0.184.1",
     "react-router-dom": "^7.17.0",
