@@ -1,8 +1,10 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+
+import tapChapaMp4 from '../assets/video_secciones/Tap_Chapa.mp4';
 
 // ─── Configuración de la secuencia de frames ───
 const FRAME_COUNT = 146; // 0.webp → 145.webp
@@ -22,6 +24,20 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const frameIndexRef = useRef({ value: 0 });
+  const tapChapaVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Estado para la interactividad de la chapa
+  const [isChapaSpinning, setIsChapaSpinning] = useState(false);
+
+  const handleChapaClick = () => {
+    if (!tapChapaVideoRef.current || isChapaSpinning) return;
+    
+    // Reproducimos una sola vez a 2x de velocidad desde el inicio
+    setIsChapaSpinning(true);
+    tapChapaVideoRef.current.playbackRate = 2.0;
+    tapChapaVideoRef.current.currentTime = 0;
+    tapChapaVideoRef.current.play();
+  };
 
   // Dibuja el frame actual en el canvas, ajustando resolución y aspect ratio
   const renderFrame = useCallback((index: number) => {
@@ -131,6 +147,39 @@ export default function Home() {
           <p className="text-lg md:text-2xl text-coca-black max-w-2xl px-4 font-medium">
             [Animación de Scroll: Dos botellas girando, acercándose, chocando y destapándose con efervescencia]
           </p>
+        </div>
+      </section>
+
+      {/* Interactive Tap Chapa Section */}
+      <section 
+        className="relative h-screen w-full flex items-center justify-center bg-black overflow-hidden cursor-pointer"
+        onClick={handleChapaClick}
+      >
+        <video
+          ref={tapChapaVideoRef}
+          src={tapChapaMp4}
+          className="absolute inset-0 w-full h-full object-cover"
+          muted
+          playsInline
+          onEnded={() => setIsChapaSpinning(false)}
+        />
+
+        <div className="absolute inset-0 bg-black/40 pointer-events-none transition-opacity duration-500" style={{ opacity: isChapaSpinning ? 0 : 0.4 }} />
+
+        {/* Indicador de Click reposicionado más abajo */}
+        <div className="absolute bottom-32 right-12 z-20 flex flex-col items-center animate-bounce pointer-events-none">
+          <svg className="w-12 h-12 text-coca-red mb-2 drop-shadow-[0_0_8px_rgba(244,0,0,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+          </svg>
+          <span className="text-white font-bold text-sm uppercase tracking-widest bg-black/50 px-3 py-1 rounded-full border border-coca-red">
+            CLICKEAME
+          </span>
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center justify-center text-center pointer-events-none mt-64">
+          <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight drop-shadow-md">
+            DESTAPA LA <span className="text-coca-red">MAGIA</span>
+          </h2>
         </div>
       </section>
 
