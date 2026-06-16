@@ -3,7 +3,7 @@
 @theme {
   --color-coca-red: #F40009;
   --color-coca-black: #000000;
-  --color-coca-white: #FFFFFF;
+  --color-coca-white: #FFFFFF;  
 }
 
 @layer base {

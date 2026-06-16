@@ -10,5 +10,11 @@
     "dev": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend",
     "install:all": "npm install"
+  },
+  "dependencies": {
+    "@react-three/fiber": "^9.6.1",
+    "@types/three": "^0.184.1",
+    "react-router-dom": "^7.17.0",
+    "three": "^0.184.0"
   }
 }
