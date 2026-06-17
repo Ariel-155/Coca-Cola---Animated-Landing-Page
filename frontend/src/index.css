@@ -15,3 +15,33 @@
     color: var(--color-coca-white);
   }
 }
+
+/* Neon orbit animation for B2B label */
+@keyframes neon-orbit {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.neon-orbit-label {
+  position: relative;
+  padding: 2px;
+  border-radius: 0.25rem;
+  background: linear-gradient(270deg, #F40009, #ff6b6b, #ffffff, #F40009);
+  background-size: 300% 300%;
+  animation: neon-orbit 3s ease infinite;
+  box-shadow: 0 0 12px rgba(244,0,9,0.6), 0 0 30px rgba(244,0,9,0.3);
+}
+
+.neon-orbit-label-inner {
+  display: block;
+  background: #fff;
+  border-radius: 0.2rem;
+  padding: 0.25rem 1rem;
+  color: #F40009;
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}

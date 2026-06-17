@@ -8,7 +8,7 @@ import tapChapaMp4 from '../assets/video_secciones/Tap_Chapa.mp4';
 import calles from '../assets/calles/calle1sma.png';
 import calles2 from '../assets/calles/calle2sma.png';
 
-const FRAME_COUNT = 146;
+const FRAME_COUNT = 134; // 0.webp → 133.webp
 const FRAME_PATH = '/frames/coca-zero/';
 
 export default function Home() {
@@ -39,7 +39,9 @@ export default function Home() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const img = imagesRef.current[index];
+    // Clamp index: nunca superar el último frame disponible
+    const safeIndex = Math.max(0, Math.min(index, imagesRef.current.length - 1));
+    const img = imagesRef.current[safeIndex];
     if (!img || !img.complete) return;
 
     const dpr = window.devicePixelRatio || 1;
@@ -56,16 +58,34 @@ export default function Home() {
     const canvasRatio = w / h;
     let drawW: number, drawH: number, drawX: number, drawY: number;
 
-    if (imgRatio > canvasRatio) {
-      drawH = h;
-      drawW = h * imgRatio;
-      drawX = (w - drawW) / 2;
-      drawY = 0;
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      // Lógica "object-contain" para celular (evita que se corten los lados)
+      if (imgRatio > canvasRatio) {
+        drawW = w;
+        drawH = w / imgRatio;
+        drawX = 0;
+        drawY = (h - drawH) / 2;
+      } else {
+        drawH = h;
+        drawW = h * imgRatio;
+        drawX = (w - drawW) / 2;
+        drawY = 0;
+      }
     } else {
-      drawW = w;
-      drawH = w / imgRatio;
-      drawX = 0;
-      drawY = (h - drawH) / 2;
+      // Lógica "object-cover" original para pantallas grandes
+      if (imgRatio > canvasRatio) {
+        drawH = h;
+        drawW = h * imgRatio;
+        drawX = (w - drawW) / 2;
+        drawY = 0;
+      } else {
+        drawW = w;
+        drawH = w / imgRatio;
+        drawX = 0;
+        drawY = (h - drawH) / 2;
+      }
     }
 
     ctx.clearRect(0, 0, w, h);
@@ -182,7 +202,7 @@ export default function Home() {
         <video
           ref={tapChapaVideoRef}
           src={tapChapaMp4}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full max-md:object-contain md:object-cover"
           muted
           playsInline
           onEnded={() => setIsChapaSpinning(false)}

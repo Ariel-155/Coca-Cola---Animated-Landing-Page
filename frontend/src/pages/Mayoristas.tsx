@@ -285,8 +285,8 @@ export default function Mayoristas() {
           </div>
           
           <div className="w-full lg:w-1/2 flex flex-col justify-center">
-            <div className="inline-block px-4 py-1 rounded-full bg-red-100 text-coca-red font-bold text-sm tracking-wider uppercase mb-6 w-max border border-red-200">
-              Socios Comerciales B2B
+            <div className="neon-orbit-label mb-6 w-max">
+              <span className="neon-orbit-label-inner">Socios Comerciales B2B</span>
             </div>
             <h1 className="text-6xl md:text-8xl font-black mb-8 text-coca-black tracking-tighter leading-[0.9]">
               CRECEMOS <br /> <span className="text-coca-red">CONTIGO</span>
@@ -318,21 +318,26 @@ export default function Mayoristas() {
             </p>
           </div>
 
-          <div className="flex overflow-x-auto gap-8 pt-8 pb-10 snap-x snap-mandatory hide-scrollbar">
+          {/* Scroll hint for mobile */}
+          <p className="text-center text-red-200/60 text-sm font-medium tracking-widest uppercase mb-4 md:hidden animate-pulse">
+            ← Desliza para ver más →
+          </p>
+
+          <div className="-mx-4 px-4 md:mx-0 md:px-0 flex md:grid md:grid-cols-2 lg:grid-cols-4 overflow-x-auto md:overflow-visible gap-5 pt-2 pb-10 snap-x snap-mandatory scroll-smooth">
             {promos.map(promo => (
               <div 
                 key={promo.id} 
-                className="min-w-[300px] md:min-w-[400px] bg-white rounded-[2rem] p-8 shadow-[0_10px_30px_rgba(244,0,9,0.3)] snap-center cursor-pointer transform transition-transform hover:-translate-y-2 relative overflow-hidden group border border-white"
+                className="w-[78vw] sm:w-[55vw] md:w-auto md:min-h-[420px] bg-white rounded-[2rem] p-6 shadow-[0_10px_30px_rgba(244,0,9,0.3)] snap-center cursor-pointer transform transition-transform hover:-translate-y-2 relative overflow-hidden group border border-white flex flex-col flex-shrink-0 md:flex-shrink"
                 onClick={() => setActiveModal(promo)}
               >
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-0 group-hover:opacity-60 transition-opacity duration-300 w-[200%] -translate-x-[150%] group-hover:translate-x-[50%] skew-x-12 ease-in-out"></div>
                 
                 <h3 className="text-5xl font-black text-coca-red mb-2">{promo.discount}</h3>
-                <h4 className="text-2xl font-bold text-coca-black mb-4 uppercase">{promo.title}</h4>
-                <p className="text-gray-600 font-medium mb-8">{promo.desc}</p>
-                <div className="flex justify-between items-center mt-auto">
+                <h4 className="text-xl font-bold text-coca-black mb-3 uppercase leading-tight">{promo.title}</h4>
+                <p className="text-gray-600 font-medium mb-6 text-sm leading-relaxed">{promo.desc}</p>
+                <div className="flex justify-between items-center mt-auto border-t border-gray-100 pt-4">
                   <span className="text-coca-red font-bold text-sm tracking-widest uppercase">Ver Detalles</span>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F40009" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F40009" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
                 </div>
               </div>
             ))}
