@@ -5,7 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 import tapChapaMp4 from '../assets/video_secciones/Tap_Chapa.mp4';
-import calles from '../assets/calles/calle1sma.png';
+import calles from '../assets/calles/calle11sma.png';
 import calles2 from '../assets/calles/calle2sma.png';
 
 const FRAME_COUNT = 146;
