@@ -7,6 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 import tapChapaMp4 from '../assets/video_secciones/Tap_Chapa.mp4';
 import calles from '../assets/calles/calle11sma.png';
 import calles2 from '../assets/calles/calle2sma.png';
+import firstGif from '../assets/Extras/First.gif';
 
 const FRAME_COUNT = 134; // 0.webp → 133.webp
 const FRAME_PATH = '/frames/coca-zero/';
@@ -30,11 +31,31 @@ export default function Home() {
   const heroImagesRef = useRef<HTMLImageElement[]>([]);
   const heroFrameIndexRef = useRef({ value: 0 });
 
+  // ── Text & Separator Refs ──
+  const introGifRef = useRef<HTMLDivElement>(null);
+  const heroText1Ref = useRef<HTMLDivElement>(null);
+  const heroText2Ref = useRef<HTMLDivElement>(null);
+  const heroText3Ref = useRef<HTMLDivElement>(null);
+  const heroSeparatorRef = useRef<HTMLDivElement>(null);
+
+  const transText1Ref = useRef<HTMLDivElement>(null);
+  const transText2Ref = useRef<HTMLDivElement>(null);
+  const transSeparatorRef = useRef<HTMLDivElement>(null);
+
   const pouringSectionRef = useRef<HTMLDivElement>(null);
   const beforeImgContainerRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
 
   const [isChapaSpinning, setIsChapaSpinning] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   const handleChapaClick = () => {
     if (!tapChapaVideoRef.current || isChapaSpinning) return;
@@ -158,35 +179,66 @@ export default function Home() {
 
     const ctx = gsap.context(() => {
 
-      // ── Animación canvas hero (frames2) ──
-      gsap.to(heroFrameIndexRef.current, {
-        value: FRAME_COUNT2 - 1,
-        ease: 'none',
+      // ── Animación canvas hero (frames2) con Textos ──
+      const heroTl = gsap.timeline({
         scrollTrigger: {
           trigger: heroScrollContainerRef.current,
           start: 'top top',
           end: 'bottom bottom',
           scrub: 0.5,
-        },
+        }
+      });
+
+      heroTl.to(heroFrameIndexRef.current, {
+        value: FRAME_COUNT2 - 1,
+        ease: 'none',
+        duration: 1,
         onUpdate: () => {
           renderHeroFrame(Math.round(heroFrameIndexRef.current.value));
         },
-      });
+      }, 0);
 
-      // ── Animación canvas transition (frames originales) ──
-      gsap.to(frameIndexRef.current, {
-        value: FRAME_COUNT - 1,
-        ease: 'none',
+      // Fade out intro GIF as soon as user starts scrolling (e.g. from 0 to 10%)
+      heroTl.to(introGifRef.current, { opacity: 0, duration: 0.1 }, 0);
+
+      // Text animations for Hero
+      heroTl.fromTo(heroText1Ref.current, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.1 }, 0.05)
+            .to(heroText1Ref.current, { opacity: 0, y: -50, duration: 0.1 }, 0.25)
+            .fromTo(heroText2Ref.current, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.1 }, 0.35)
+            .to(heroText2Ref.current, { opacity: 0, y: -50, duration: 0.1 }, 0.55)
+            .fromTo(heroText3Ref.current, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.1 }, 0.65)
+            .to(heroText3Ref.current, { opacity: 0, scale: 1.2, duration: 0.1 }, 0.85);
+
+      // Separator Effect at the end of Hero (fade in a gradient)
+      heroTl.fromTo(heroSeparatorRef.current, { opacity: 0 }, { opacity: 1, duration: 0.15 }, 0.85);
+
+      // ── Animación canvas transition (coca zero) con Textos ──
+      const transTl = gsap.timeline({
         scrollTrigger: {
           trigger: scrollContainerRef.current,
           start: 'top top',
           end: 'bottom bottom',
           scrub: 0.5,
-        },
+        }
+      });
+
+      transTl.to(frameIndexRef.current, {
+        value: FRAME_COUNT - 1,
+        ease: 'none',
+        duration: 1,
         onUpdate: () => {
           renderFrame(Math.round(frameIndexRef.current.value));
         },
-      });
+      }, 0);
+
+      // Text animations for Transition
+      transTl.fromTo(transText1Ref.current, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.15 }, 0.2)
+             .to(transText1Ref.current, { opacity: 0, x: 50, duration: 0.15 }, 0.4)
+             .fromTo(transText2Ref.current, { opacity: 0, x: -50, y: 50 }, { opacity: 1, x: 0, y: 0, duration: 0.15 }, 0.5)
+             .to(transText2Ref.current, { opacity: 0, x: -50, y: -50, duration: 0.1 }, 0.65);
+
+      // Separator Effect at the end of Transition
+      transTl.fromTo(transSeparatorRef.current, { opacity: 0 }, { opacity: 1, duration: 0.15 }, 0.85);
 
       // ── Slider de calles ──
       const pouringEl = pouringSectionRef.current;
@@ -232,11 +284,45 @@ export default function Home() {
       <div
         ref={heroScrollContainerRef}
         id="hero"
-        className="relative w-full"
+        className="relative w-full bg-black"
         style={{ height: '400vh' }}
       >
-        <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
-          <canvas ref={heroCanvasRef} className="w-full h-full" />
+        <div className="sticky top-0 h-screen w-full overflow-hidden bg-black flex flex-col justify-center">
+          <canvas ref={heroCanvasRef} className="w-full h-full object-cover relative z-0" />
+          
+          {/* Intro GIF Overlay con efecto Spotlight */}
+          <div 
+            ref={introGifRef}
+            className="absolute inset-0 pointer-events-none z-10"
+            style={{
+              backgroundImage: `url(${firstGif})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              // Mascara radial más pequeña y definida para ver mejor el fondo
+              WebkitMaskImage: `radial-gradient(circle 100px at ${mousePos.x}px ${mousePos.y}px, transparent 0%, transparent 40%, rgba(0,0,0,0.8) 80%, black 100%)`,
+              maskImage: `radial-gradient(circle 100px at ${mousePos.x}px ${mousePos.y}px, transparent 0%, transparent 40%, rgba(0,0,0,0.8) 80%, black 100%)`
+            }}
+          />
+          
+          {/* Text Overlays */}
+          <div ref={heroText1Ref} className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 px-4 z-20">
+             <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] text-center">
+               El sabor que <span className="text-coca-red">nos une</span>
+             </h2>
+          </div>
+          <div ref={heroText2Ref} className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 px-4">
+             <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] text-center">
+               Refresca tu <br /> <span className="text-coca-red">Mundo</span>
+             </h2>
+          </div>
+          <div ref={heroText3Ref} className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 px-4">
+             <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] text-center">
+               Magia de <span className="text-coca-red">Verdad</span>
+             </h2>
+          </div>
+
+          {/* JS Gradient Separator Effect */}
+          <div ref={heroSeparatorRef} className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-[#110000] to-transparent pointer-events-none opacity-0" />
         </div>
       </div>
 
@@ -276,11 +362,26 @@ export default function Home() {
       <div
         ref={scrollContainerRef}
         id="transition"
-        className="relative w-full"
+        className="relative w-full bg-black"
         style={{ height: '400vh' }}
       >
-        <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
-          <canvas ref={canvasRef} className="w-full h-full" />
+        <div className="sticky top-0 h-screen w-full overflow-hidden bg-black flex flex-col justify-center">
+          <canvas ref={canvasRef} className="w-full h-full object-cover" />
+          
+          {/* Text Overlays */}
+          <div ref={transText1Ref} className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 px-4">
+             <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] text-center">
+               Sin azúcar <br /> <span className="text-gray-400">Todo el sabor</span>
+             </h2>
+          </div>
+          <div ref={transText2Ref} className="absolute inset-0 flex items-start justify-start pointer-events-none opacity-0 px-8 pt-32 md:px-24 md:pt-48">
+             <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] text-left bg-black/30 p-6 rounded-3xl backdrop-blur-sm border border-white/10">
+               Atrévete a <br /> <span className="text-coca-red">Probarlo</span>
+             </h2>
+          </div>
+
+          {/* JS Gradient Separator Effect */}
+          <div ref={transSeparatorRef} className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-zinc-900 to-transparent pointer-events-none opacity-0" />
         </div>
       </div>
 
