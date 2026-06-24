@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState} from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -11,6 +11,11 @@ import calles2 from '../assets/calles/calle2sma.png';
 const FRAME_COUNT = 134; // 0.webp → 133.webp
 const FRAME_PATH = '/frames/coca-zero/';
 
+const FRAME_START2 = 70;
+const FRAME_END2 = 129;
+const FRAME_COUNT2 = FRAME_END2 - FRAME_START2 + 1; // 60 frames
+const FRAME_PREFIX2 = '/frames2/video-coca-cola_';
+
 export default function Home() {
   const mainRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -18,6 +23,12 @@ export default function Home() {
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const frameIndexRef = useRef({ value: 0 });
   const tapChapaVideoRef = useRef<HTMLVideoElement>(null);
+
+  // ── Hero canvas refs ──
+  const heroScrollContainerRef = useRef<HTMLDivElement>(null);
+  const heroCanvasRef = useRef<HTMLCanvasElement>(null);
+  const heroImagesRef = useRef<HTMLImageElement[]>([]);
+  const heroFrameIndexRef = useRef({ value: 0 });
 
   const pouringSectionRef = useRef<HTMLDivElement>(null);
   const beforeImgContainerRef = useRef<HTMLDivElement>(null);
@@ -33,67 +44,86 @@ export default function Home() {
     tapChapaVideoRef.current.play();
   };
 
-  const renderFrame = useCallback((index: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  // ── Render helper (reutilizable para cualquier canvas) ──
+  const renderFrameOnCanvas = useCallback(
+    (
+      canvas: HTMLCanvasElement | null,
+      images: HTMLImageElement[],
+      index: number
+    ) => {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    // Clamp index: nunca superar el último frame disponible
-    const safeIndex = Math.max(0, Math.min(index, imagesRef.current.length - 1));
-    const img = imagesRef.current[safeIndex];
-    if (!img || !img.complete) return;
+      const safeIndex = Math.max(0, Math.min(index, images.length - 1));
+      const img = images[safeIndex];
+      if (!img || !img.complete) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
 
-    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      ctx.scale(dpr, dpr);
-    }
-
-    const imgRatio = img.naturalWidth / img.naturalHeight;
-    const canvasRatio = w / h;
-    let drawW: number, drawH: number, drawX: number, drawY: number;
-
-    const isMobile = window.innerWidth < 768;
-
-    if (isMobile) {
-      // Lógica "object-contain" para celular (evita que se corten los lados)
-      if (imgRatio > canvasRatio) {
-        drawW = w;
-        drawH = w / imgRatio;
-        drawX = 0;
-        drawY = (h - drawH) / 2;
-      } else {
-        drawH = h;
-        drawW = h * imgRatio;
-        drawX = (w - drawW) / 2;
-        drawY = 0;
+      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.scale(dpr, dpr);
       }
-    } else {
-      // Lógica "object-cover" original para pantallas grandes
-      if (imgRatio > canvasRatio) {
-        drawH = h;
-        drawW = h * imgRatio;
-        drawX = (w - drawW) / 2;
-        drawY = 0;
-      } else {
-        drawW = w;
-        drawH = w / imgRatio;
-        drawX = 0;
-        drawY = (h - drawH) / 2;
-      }
-    }
 
-    ctx.clearRect(0, 0, w, h);
-    ctx.drawImage(img, drawX, drawY, drawW, drawH);
-  }, []);
+      const imgRatio = img.naturalWidth / img.naturalHeight;
+      const canvasRatio = w / h;
+      let drawW: number, drawH: number, drawX: number, drawY: number;
+
+      const isMobile = window.innerWidth < 768;
+
+      if (isMobile) {
+        if (imgRatio > canvasRatio) {
+          drawW = w;
+          drawH = w / imgRatio;
+          drawX = 0;
+          drawY = (h - drawH) / 2;
+        } else {
+          drawH = h;
+          drawW = h * imgRatio;
+          drawX = (w - drawW) / 2;
+          drawY = 0;
+        }
+      } else {
+        if (imgRatio > canvasRatio) {
+          drawH = h;
+          drawW = h * imgRatio;
+          drawX = (w - drawW) / 2;
+          drawY = 0;
+        } else {
+          drawW = w;
+          drawH = w / imgRatio;
+          drawX = 0;
+          drawY = (h - drawH) / 2;
+        }
+      }
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(img, drawX, drawY, drawW, drawH);
+    },
+    []
+  );
+
+  // Wrappers individuales para mantener compatibilidad
+  const renderFrame = useCallback(
+    (index: number) => {
+      renderFrameOnCanvas(canvasRef.current, imagesRef.current, index);
+    },
+    [renderFrameOnCanvas]
+  );
+
+  const renderHeroFrame = useCallback(
+    (index: number) => {
+      renderFrameOnCanvas(heroCanvasRef.current, heroImagesRef.current, index);
+    },
+    [renderFrameOnCanvas]
+  );
 
   useEffect(() => {
-    // Precargar frames del canvas
+    // ── Precargar frames del canvas principal (transition) ──
     const images: HTMLImageElement[] = [];
     let loadedCount = 0;
 
@@ -109,10 +139,41 @@ export default function Home() {
     }
     imagesRef.current = images;
 
-    // ── Fix: gsap.context recibe UN solo elemento, no un array ──
+    // ── Precargar frames del hero (/frames2) ──
+    const heroImages: HTMLImageElement[] = [];
+    let heroLoadedCount = 0;
+
+    for (let i = 0; i < FRAME_COUNT2; i++) {
+      const img = new Image();
+      const frameNum = String(FRAME_START2 + i).padStart(3, '0');
+      img.src = `${FRAME_PREFIX2}${frameNum}.webp`;
+      img.onload = () => {
+        heroLoadedCount++;
+        if (i === 0) renderHeroFrame(0);
+        if (heroLoadedCount === FRAME_COUNT2) renderHeroFrame(heroFrameIndexRef.current.value);
+      };
+      heroImages[i] = img;
+    }
+    heroImagesRef.current = heroImages;
+
     const ctx = gsap.context(() => {
 
-      // Animación canvas frame sequence
+      // ── Animación canvas hero (frames2) ──
+      gsap.to(heroFrameIndexRef.current, {
+        value: FRAME_COUNT2 - 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: heroScrollContainerRef.current,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.5,
+        },
+        onUpdate: () => {
+          renderHeroFrame(Math.round(heroFrameIndexRef.current.value));
+        },
+      });
+
+      // ── Animación canvas transition (frames originales) ──
       gsap.to(frameIndexRef.current, {
         value: FRAME_COUNT - 1,
         ease: 'none',
@@ -127,16 +188,14 @@ export default function Home() {
         },
       });
 
-      // ── Fix: Slider de calles corregido ──
+      // ── Slider de calles ──
       const pouringEl = pouringSectionRef.current;
       const beforeEl = beforeImgContainerRef.current;
       const handleEl = handleRef.current;
 
       if (pouringEl && beforeEl && handleEl) {
-
-        // Fix: Reseteamos estilos iniciales correctamente via GSAP
         gsap.set(handleEl, { left: '0%' });
-        gsap.set(beforeEl, { clipPath: 'inset(0% 100% 0% 0%)' }); // ← Fix clave: inset es más confiable que polygon para revelar de izquierda a derecha
+        gsap.set(beforeEl, { clipPath: 'inset(0% 100% 0% 0%)' });
 
         const tl = gsap.timeline({
           scrollTrigger: {
@@ -149,24 +208,15 @@ export default function Home() {
           }
         });
 
-        // Mueve el handle de 0% a 100%
-        tl.to(handleEl, {
-          left: '100%',
-          ease: 'none',
-        }, 0);
-
-        // Fix: usa inset() en vez de polygon() para el clip-path
-        // inset(top right bottom left) → reducimos el lado derecho de 100% a 0%
-        tl.to(beforeEl, {
-          clipPath: 'inset(0% 0% 0% 0%)', // revela completamente la imagen superior
-          ease: 'none',
-        }, 0);
+        tl.to(handleEl, { left: '100%', ease: 'none' }, 0);
+        tl.to(beforeEl, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none' }, 0);
       }
 
-    }, mainRef); // ← Fix: usar mainRef que engloba TODA la página para limpiar correctamente TODOS los ScrollTriggers
+    }, mainRef);
 
     const handleResize = () => {
       renderFrame(Math.round(frameIndexRef.current.value));
+      renderHeroFrame(Math.round(heroFrameIndexRef.current.value));
     };
     window.addEventListener('resize', handleResize);
 
@@ -174,24 +224,21 @@ export default function Home() {
       ctx.revert();
       window.removeEventListener('resize', handleResize);
     };
-  }, [renderFrame]);
+  }, [renderFrame, renderHeroFrame]);
 
   return (
     <div ref={mainRef}>
-      {/* Hero Section */}
-      <section
+      {/* Hero Section — Canvas Frame Sequence con /frames2 */}
+      <div
+        ref={heroScrollContainerRef}
         id="hero"
-        className="relative h-[calc(100vh-76px)] w-full flex items-center justify-center bg-coca-red overflow-hidden"
+        className="relative w-full"
+        style={{ height: '400vh' }}
       >
-        <div className="absolute inset-0 border-8 border-dashed border-coca-black/30 m-8 rounded-3xl flex flex-col items-center justify-center text-center">
-          <h1 className="text-5xl md:text-7xl font-black mb-6 text-coca-black tracking-tight">
-            TASTE THE <span className="text-white">FEELING</span>
-          </h1>
-          <p className="text-lg md:text-2xl text-coca-black max-w-2xl px-4 font-medium">
-            [Animación de Scroll: Dos botellas girando, acercándose, chocando y destapándose con efervescencia]
-          </p>
+        <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
+          <canvas ref={heroCanvasRef} className="w-full h-full" />
         </div>
-      </section>
+      </div>
 
       {/* Interactive Tap Chapa Section */}
       <section
@@ -225,7 +272,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Transition Section — Canvas Frame Sequence */}
+      {/* Transition Section — Canvas Frame Sequence (coca-zero) */}
       <div
         ref={scrollContainerRef}
         id="transition"
@@ -244,19 +291,14 @@ export default function Home() {
         className="relative h-screen w-full bg-black overflow-hidden flex items-center justify-center"
       >
         <div className="relative w-full h-full overflow-hidden shadow-2xl select-none">
-
-          {/* Imagen base: Calle limpia */}
           <img
             src={calles2}
             alt="Calle Barranco Limpia"
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           />
-
-          {/* Imagen superior: Calle Coca-Cola — revelada por clip-path */}
           <div
             ref={beforeImgContainerRef}
             className="absolute inset-0 z-10 pointer-events-none"
-            // Fix: style inicial aquí también por si GSAP tarda en montar
             style={{ clipPath: 'inset(0% 100% 0% 0%)' }}
           >
             <img
@@ -265,23 +307,20 @@ export default function Home() {
               className="absolute inset-0 w-full h-full object-cover"
             />
           </div>
-
-          {/* Handle — Fix: quitamos el translateX del style inline, GSAP lo maneja */}
           <div
             ref={handleRef}
             className="absolute top-0 bottom-0 w-1 bg-white z-20 flex items-center justify-center drop-shadow-xl"
             style={{ left: '0%' }}
           >
-            {/* Manija limpia, sin emojis innecesarios */}
             <div className="w-8 h-8 bg-white rounded-full shadow-[0_0_15px_rgba(0,0,0,0.5)] border-2 border-gray-100 pointer-events-none" />
           </div>
         </div>
 
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none text-center p-4">
-            <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
-              Transformando <br />
-              <span className="text-coca-red">Espacios</span>
-            </h2>
+          <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+            Transformando <br />
+            <span className="text-coca-red">Espacios</span>
+          </h2>
         </div>
       </section>
 
