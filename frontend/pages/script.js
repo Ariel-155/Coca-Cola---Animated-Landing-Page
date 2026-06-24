@@ -1,66 +1,108 @@
-// 1. Control del Modal de Información Nutricional (Corregido para leer Ingredientes)
+
+// ==========================================
+// 1. CONFIGURACIÓN INICIAL Y ELEMENTOS
+// ==========================================
 const modal = document.getElementById("nutricion-modal");
 const btnCerrar = document.getElementById("cerrar-modal");
-
-document.querySelectorAll('.btn-info').forEach(boton => {
-    boton.addEventListener('click', function() {
-        // Buscamos el contenedor '.producto-info' de esta tarjeta específica
-        const contenedorInfo = this.closest('.producto-info');
-        // Buscamos el bloque oculto que contiene la tabla y los ingredientes
-        const bloqueDatos = contenedorInfo.querySelector(".datos-nutricionales");
-
-        if (bloqueDatos) {
-            // Inyectamos todo el contenido oculto dentro del cuerpo del modal
-            document.getElementById("modal-body").innerHTML = bloqueDatos.innerHTML;
-            // Mostramos el modal en la pantalla
-            modal.style.display = "flex";
-        }
-    });
-});
-// Función para cerrar el modal de forma limpia
-function ocultarModal() {
-    modal.style.display = "none";
-}
-
-// Evento para cerrar al hacer clic en la 'X'
-if (btnCerrar) {
-    btnCerrar.addEventListener('click', ocultarModal);
-}
-
-// Evento para cerrar si hacen clic fuera de la caja blanca del modal
-window.addEventListener('click', (event) => {
-    if (event.target === modal) {
-        ocultarModal();
-    }
-});
-
-
-// 2. Sistema de Filtro en Tiempo Real del Buscador
 const buscador = document.getElementById('buscador');
-if (buscador) {
-    buscador.addEventListener('input', function() {
-        const filtro = this.value.toLowerCase();
-        const productos = document.querySelectorAll('.producto');
+const btnTop = document.getElementById('btn-top');
+const nav = document.querySelector('.barra-navegacion');
 
-        productos.forEach(producto => {
-            const nombre = producto.querySelector('h2').innerText.toLowerCase();
-            producto.style.display = nombre.includes(filtro) ? 'flex' : 'none';
-        });
-    });
+// ==========================================
+// 2. SISTEMA DEL MODAL
+// ==========================================
+document.querySelectorAll('.btn-info').forEach(boton => {
+    boton.addEventListener('click', function() {
+        const contenedorInfo = this.closest('.producto-info');
+        const bloqueDatos = contenedorInfo.querySelector(".datos-nutricionales");
+
+        if (bloqueDatos && modal) {
+            document.getElementById("modal-body").innerHTML = bloqueDatos.innerHTML;
+            modal.style.display = "flex";
+            document.body.style.overflow = 'hidden'; // Bloquea scroll al abrir modal
+        }
+    });
+});
+
+function ocultarModal() {
+    if (modal) {
+        modal.style.display = "none";
+        document.body.style.overflow = 'auto'; // Reactiva scroll
+    }
 }
-// 3. Botón de Regresar (Historial de navegación)
+
+if (btnCerrar) btnCerrar.addEventListener('click', ocultarModal);
+
+window.addEventListener('click', (event) => {
+    if (event.target === modal) ocultarModal();
+});
+
+// ==========================================
+// 3. BUSCADOR CON MENSAJE DE "SIN RESULTADOS"
+// ==========================================
+if (buscador) {
+    buscador.addEventListener('input', function() {
+        const filtro = this.value.toLowerCase();
+        const productos = document.querySelectorAll('.producto');
+        let encontrados = 0;
+
+        productos.forEach(producto => {
+            const nombre = producto.querySelector('h2').innerText.toLowerCase();
+            const esVisible = nombre.includes(filtro);
+            producto.style.display = esVisible ? 'flex' : 'none';
+            if (esVisible) encontrados++;
+        });
+
+        // Opcional: Si tienes un div con id="mensaje-no-resultados" en tu HTML
+        const mensaje = document.getElementById('mensaje-no-resultados');
+        if (mensaje) {
+            mensaje.style.display = encontrados === 0 ? 'block' : 'none';
+        }
+    });
+}
+
+// ==========================================
+// 4. NAVEGACIÓN Y EFECTOS DE SCROLL
+// ==========================================
+
+// Barra de navegación que cambia al bajar
+window.addEventListener('scroll', () => {
+    if (nav) {
+        if (window.scrollY > 50) nav.classList.add('scrolled');
+        else nav.classList.remove('scrolled');
+    }
+});
+
+// Botón de Regresar
 const btnRegresar = document.getElementById('btn-regresar');
 if (btnRegresar) {
-    btnRegresar.addEventListener('click', () => {
-        window.history.back();
-    });
+    btnRegresar.addEventListener('click', () => window.history.back());
 }
 
-
-// 4. Botón Top (Scroll automático hacia arriba)
-const btnTop = document.getElementById('btn-top');
+// Botón Top
 if (btnTop) {
-    btnTop.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    btnTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+// ==========================================
+// 5. EFECTO FADE-IN PARA PRODUCTOS
+// ==========================================
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.producto').forEach(prod => {
+    prod.classList.add('fade-in'); // Asegúrate de tener esta clase en tu CSS
+    observer.observe(prod);
+});
+
+function toggleLocationMenu() {
+    const menu = document.getElementById('location-menu');
+    menu.classList.toggle('show');
 }
