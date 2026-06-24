@@ -116,7 +116,6 @@ export default function Home() {
       gsap.to(frameIndexRef.current, {
         value: FRAME_COUNT - 1,
         ease: 'none',
-        snap: 1,
         scrollTrigger: {
           trigger: scrollContainerRef.current,
           start: 'top top',

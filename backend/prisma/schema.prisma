@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  password     String?  // null para usuarios OAuth
+  provider     String   @default("local") // "local" | "google"
+  googleId     String?  @unique
+  avatarUrl    String?
+  location     String?
+  deliveryDay  String?  // "Lunes", "Martes", etc.
+  deliveryTime String?  // "09:00 - 12:00"
+  totalOrders  Int      @default(0)
+  totalSpent   Float    @default(0.0)
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}

@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useAuth } from './context/AuthContext';
 
 gsap.registerPlugin(ScrollTrigger);
 import Home from './pages/Home';
 import Experiencia from './pages/Experiencia';
 import Mayoristas from './pages/Mayoristas';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -90,13 +93,9 @@ function App() {
               <Link to="/mayoristas" className="hover:text-coca-red transition-colors">Mayoristas</Link>
             </div>
             
-            {/* Desktop Join Button */}
-            <div className="hidden md:block">
-              <a href="https://www.coca-colacompany.com/" target='_blank' rel='noopener noreferrer'>
-                  <button className="bg-coca-red hover:bg-red-700 text-white px-6 py-2 rounded-full font-bold transition-all transform hover:scale-105">
-                    Únete
-                  </button>         
-              </a>
+            {/* Desktop Auth Buttons */}
+            <div className="hidden md:flex items-center gap-3">
+              <NavAuthButtons />
             </div>
 
             {/* Mobile Hamburger Button */}
@@ -120,30 +119,112 @@ function App() {
             <Link to="/experiencia" className="hover:text-coca-red transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Experiencia</Link>
             <Link to="/mayoristas" className="hover:text-coca-red transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Mayoristas</Link>
           </div>
-          <a href="https://www.coca-colacompany.com/" target='_blank' rel='noopener noreferrer' className="mt-16">
-            <button className="bg-coca-red hover:bg-red-700 text-white px-10 py-4 rounded-full font-bold text-xl transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(244,0,0,0.4)]">
-              Únete
-            </button>         
-          </a>
+          <div className="mt-16 flex flex-col items-center gap-4">
+            <MobileAuthButtons closeMobileMenu={() => setIsMobileMenuOpen(false)} />
+          </div>
         </div>
 
-        {/* Content Wrapper */}
-        <div className="pt-[76px]">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/experiencia" element={<Experiencia />} />
-            <Route path="/mayoristas" element={<Mayoristas />} />
-            
-          </Routes>
-        </div>
-
-        {/* Footer */}
-        <footer className="bg-coca-black border-t border-coca-red/20 py-8 text-center text-sm text-gray-500">
-          <p>&copy; 2026 Coca-Cola Company. Landing Page Project for Cibertec.</p>
-        </footer>
+        {/* Content Wrapper — no pt on login/dashboard */}
+        <ContentWrapper />
 
       </div>
     </BrowserRouter>
+  );
+}
+
+function NavAuthButtons() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
+  if (user) {
+    return (
+      <>
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-2 px-4 py-2 rounded-full border border-coca-red/50 text-coca-red font-bold text-sm hover:bg-coca-red hover:text-white transition-all"
+        >
+          <span className="w-5 h-5 bg-coca-red text-white rounded-full text-xs flex items-center justify-center font-black">
+            {user.username[0].toUpperCase()}
+          </span>
+          Dashboard
+        </Link>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 rounded-full border border-white/10 text-gray-400 hover:border-coca-red hover:text-coca-red transition-all text-sm font-medium"
+        >
+          Salir
+        </button>
+      </>
+    );
+  }
+
+  return (
+    <Link to="/login">
+      <button className="bg-coca-red hover:bg-red-700 text-white px-6 py-2 rounded-full font-bold transition-all transform hover:scale-105">
+        Únete
+      </button>
+    </Link>
+  );
+}
+
+function MobileAuthButtons({ closeMobileMenu }: { closeMobileMenu: () => void }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    closeMobileMenu();
+    navigate('/');
+  };
+
+  if (user) {
+    return (
+      <>
+        <Link to="/dashboard" onClick={closeMobileMenu} className="bg-coca-red text-white px-10 py-4 rounded-full font-bold text-xl shadow-[0_0_20px_rgba(244,0,0,0.4)] hover:bg-red-700 transition-all">
+          Dashboard
+        </Link>
+        <button onClick={handleLogout} className="text-gray-400 hover:text-white text-lg font-medium transition-colors">
+          Cerrar sesión
+        </button>
+      </>
+    );
+  }
+
+  return (
+    <Link to="/login" onClick={closeMobileMenu}>
+      <button className="bg-coca-red hover:bg-red-700 text-white px-10 py-4 rounded-full font-bold text-xl transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(244,0,0,0.4)]">
+        Únete
+      </button>
+    </Link>
+  );
+}
+
+function ContentWrapper() {
+  const location = useLocation();
+  const isFullPage = location.pathname === '/login' || location.pathname === '/dashboard';
+
+  return (
+    <>
+      <div className={isFullPage ? '' : 'pt-[76px]'}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/experiencia" element={<Experiencia />} />
+          <Route path="/mayoristas" element={<Mayoristas />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </div>
+      {!isFullPage && (
+        <footer className="bg-coca-black border-t border-coca-red/20 py-8 text-center text-sm text-gray-500">
+          <p>&copy; 2026 Coca-Cola Company. Landing Page Project for Cibertec.</p>
+        </footer>
+      )}
+    </>
   );
 }
 
