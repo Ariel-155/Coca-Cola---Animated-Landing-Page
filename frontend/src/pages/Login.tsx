@@ -76,30 +76,37 @@ export default function Login() {
     }
   };
 
-  const handleGoogleResponse = async (response: { credential: string }) => {
-    setSubmitting(true); setError('');
-    try {
-      await googleLogin(response.credential);
-      navigate('/dashboard');
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error con Google');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
+  // Ref estable para el callback de Google — no cambia entre renders
+  const googleLoginRef = useRef(googleLogin);
+  useEffect(() => { googleLoginRef.current = googleLogin; }, [googleLogin]);
+  const navigateRef = useRef(navigate);
+  useEffect(() => { navigateRef.current = navigate; }, [navigate]);
 
-  const initGoogleButton = (el: HTMLDivElement | null) => {
+  // Render the Google button whenever googleLoaded or mode changes
+  useEffect(() => {
+    const el = googleButtonRef.current;
     if (!el || !window.google) return;
-    
+
     if (!googleInitialized.current) {
       window.google.accounts.id.initialize({
         client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '65952804171-ne7heser2g5ntfro5bvsncfjrdhc5rl3.apps.googleusercontent.com',
-        callback: handleGoogleResponse,
+        callback: async (response: { credential: string }) => {
+          setSubmitting(true); setError('');
+          try {
+            await googleLoginRef.current(response.credential);
+            navigateRef.current('/dashboard');
+          } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Error con Google');
+          } finally {
+            setSubmitting(false);
+          }
+        },
       });
       googleInitialized.current = true;
     }
 
-    el.innerHTML = ''; // Limpiar cualquier render previo del botón
+    el.innerHTML = '';
     window.google.accounts.id.renderButton(el, {
       theme: 'outline',
       size: 'large',
@@ -107,7 +114,7 @@ export default function Login() {
       shape: 'pill',
       logo_alignment: 'center',
     });
-  };
+  }, [googleLoaded, mode]); // Sólo corre cuando carga el script o cambia el modo
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -297,15 +304,17 @@ export default function Login() {
                 <div className="flex-1 h-px bg-white/10" />
               </div>
 
-              {/* Google Button */}
+              {/* Google Button — div estático, nunca se desmonta */}
               <div className="flex justify-center w-full min-h-[44px]">
-                {googleLoaded ? (
-                  <div ref={initGoogleButton} className="w-full flex justify-center" />
-                ) : (
+                {!googleLoaded && (
                   <div className="w-full h-11 border border-white/10 rounded-full flex items-center justify-center bg-white/5 animate-pulse">
                     <span className="text-gray-500 text-sm">Cargando Google...</span>
                   </div>
                 )}
+                <div
+                  ref={googleButtonRef}
+                  className={`w-full flex justify-center ${googleLoaded ? '' : 'hidden'}`}
+                />
               </div>
             </>
           ) : (
