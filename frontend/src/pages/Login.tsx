@@ -33,7 +33,6 @@ export default function Login() {
   // Google Script
   useEffect(() => {
     if (window.google) {
-      setGoogleLoaded(true);
       return;
     }
     const script = document.createElement('script');
@@ -171,7 +170,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-16">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4 pt-24 pb-12">
       {/* Background pattern */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-coca-red/5 rounded-full blur-3xl" />
@@ -182,7 +181,7 @@ export default function Login() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/">
-            <img src="/src/assets/logo2.png" alt="Coca-Cola" className="h-16 mx-auto object-contain" />
+            <img src="/src/assets/logo2.png" alt="Coca-Cola" className="h-10 mx-auto object-contain" />
           </Link>
         </div>
 

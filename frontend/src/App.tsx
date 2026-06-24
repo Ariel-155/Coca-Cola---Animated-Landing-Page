@@ -8,6 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 import Home from './pages/Home';
 import Experiencia from './pages/Experiencia';
 import Mayoristas from './pages/Mayoristas';
+import Productos from './pages/Productos';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 
@@ -73,8 +74,27 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <div className="bg-coca-black min-h-screen text-coca-white font-sans">
-        
-        {/* Navbar */}
+        <Navigation 
+          isMobileMenuOpen={isMobileMenuOpen} 
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+          isNavVisible={isNavVisible} 
+        />
+        <ContentWrapper />
+      </div>
+    </BrowserRouter>
+  );
+}
+
+interface NavigationProps {
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (isOpen: boolean) => void;
+  isNavVisible: boolean;
+}
+
+function Navigation({ isMobileMenuOpen, setIsMobileMenuOpen, isNavVisible }: NavigationProps) {
+  return (
+    <>
+      {/* Navbar */}
         <nav 
           className={`fixed w-full z-50 top-0 bg-coca-black/80 backdrop-blur-md border-b border-coca-red/20 transition-transform duration-500 ease-in-out ${
             isNavVisible || isMobileMenuOpen ? 'translate-y-0' : '-translate-y-full'
@@ -88,7 +108,7 @@ function App() {
             </div>
             <div className="hidden md:flex gap-8 text-sm font-medium tracking-wide">
               <Link to="/" className="hover:text-coca-red transition-colors">Inicio</Link>
-              <a href="/pages/Productos.html" className="hover:text-coca-red transition-colors">Productos</a>
+              <Link to="/productos" className="hover:text-coca-red transition-colors">Productos</Link>
               <Link to="/experiencia" className="hover:text-coca-red transition-colors">Experiencia</Link>
               <Link to="/mayoristas" className="hover:text-coca-red transition-colors">Mayoristas</Link>
             </div>
@@ -115,7 +135,7 @@ function App() {
         <div className={`fixed inset-0 bg-coca-black/95 backdrop-blur-lg z-40 flex flex-col items-center justify-center transition-all duration-500 md:hidden ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
           <div className="flex flex-col gap-10 text-3xl font-black tracking-wide text-center">
             <Link to="/" className="hover:text-coca-red transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Inicio</Link>
-            <a href="/pages/Productos.html" className="hover:text-coca-red transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Productos</a>
+            <Link to="/productos" className="hover:text-coca-red transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Productos</Link>
             <Link to="/experiencia" className="hover:text-coca-red transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Experiencia</Link>
             <Link to="/mayoristas" className="hover:text-coca-red transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Mayoristas</Link>
           </div>
@@ -123,12 +143,7 @@ function App() {
             <MobileAuthButtons closeMobileMenu={() => setIsMobileMenuOpen(false)} />
           </div>
         </div>
-
-        {/* Content Wrapper — no pt on login/dashboard */}
-        <ContentWrapper />
-
-      </div>
-    </BrowserRouter>
+    </>
   );
 }
 
@@ -213,6 +228,7 @@ function ContentWrapper() {
       <div className={isFullPage ? '' : 'pt-[76px]'}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/productos" element={<Productos />} />
           <Route path="/experiencia" element={<Experiencia />} />
           <Route path="/mayoristas" element={<Mayoristas />} />
           <Route path="/login" element={<Login />} />
