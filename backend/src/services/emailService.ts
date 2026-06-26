@@ -35,7 +35,7 @@ export async function sendOtpEmail(email: string, otp: string, username: string)
               <tr>
                 <td style="padding:40px 32px;">
                   <p style="color:#a1a1aa;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;margin:0 0 12px;">Verificación de cuenta</p>
-                  <h2 style="font-size:28px;font-weight:bold;color:#ffffff;margin:0 0 24px;">Hola, <span style="color:#f40009;">\${username}</span></h2>
+                  <h2 style="font-size:28px;font-weight:bold;color:#ffffff;margin:0 0 24px;">Hola, <span style="color:#f40009;">${username}</span></h2>
                   
                   <p style="color:#a1a1aa;font-size:15px;line-height:1.6;margin:0 0 32px;">
                     Tu código de verificación de <strong style="color:#ffffff;">6 dígitos</strong> para completar tu registro es:
@@ -43,7 +43,7 @@ export async function sendOtpEmail(email: string, otp: string, username: string)
                   
                   <!-- OTP Box -->
                   <div style="background-color:#09090b;border:1px solid #f40009;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
-                    <span style="font-size:36px;font-weight:bold;letter-spacing:12px;color:#f40009;font-family:monospace;">\${otp}</span>
+                    <span style="font-size:36px;font-weight:bold;letter-spacing:12px;color:#f40009;font-family:monospace;">${otp}</span>
                   </div>
                   
                   <!-- Warning Box -->

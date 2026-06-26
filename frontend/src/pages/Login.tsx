@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import logoImg from '../assets/logo2.png';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
@@ -188,8 +189,8 @@ export default function Login() {
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/">
-            <img src="/src/assets/logo2.png" alt="Coca-Cola" className="h-10 mx-auto object-contain" />
+          <Link to="/" className="mb-8 block">
+            <img src={logoImg} alt="Coca-Cola" className="h-10 mx-auto object-contain" />
           </Link>
         </div>
 

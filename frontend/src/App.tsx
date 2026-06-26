@@ -13,24 +13,36 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import logoImg from './assets/logo2.png';
 
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
     // 1. Limpiar todos los ScrollTriggers "huérfanos" para evitar que bloqueen el DOM
     ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     
-    // 2. Posicionarse en la parte superior
-    window.scrollTo(0, 0);
+    if (hash) {
+      // Si hay un hash (ej. #cta), esperar a que el DOM se monte y hacer scroll suave
+      const timer = setTimeout(() => {
+        const el = document.querySelector(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+        ScrollTrigger.refresh();
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      // 2. Posicionarse en la parte superior
+      window.scrollTo(0, 0);
 
-    // 3. Recalcular GSAP después de que el nuevo DOM se haya montado
-    const timer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [pathname]);
+      // 3. Recalcular GSAP después de que el nuevo DOM se haya montado
+      const timer = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname, hash]);
 
   return null;
 }
@@ -105,7 +117,7 @@ function Navigation({ isMobileMenuOpen, setIsMobileMenuOpen, isNavVisible }: Nav
           <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className='Logo'>
               <Link to="/">
-                <img src="/src/assets/logo2.png" alt="Coca-cola" style={{ width: '150px', height: 'auto' }}/>
+                <img src={logoImg} alt="Coca-cola" style={{ width: '150px', height: 'auto' }}/>
               </Link>
             </div>
             <div className="hidden md:flex gap-8 text-sm font-medium tracking-wide">

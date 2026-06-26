@@ -119,7 +119,11 @@ router.post('/register/verify', otpVerifyLimiter, async (req: Request, res: Resp
       provider: 'local',
       isVerified: true,
     },
-    select: { id: true, username: true, email: true, avatarUrl: true, createdAt: true },
+    select: { 
+      id: true, username: true, email: true, avatarUrl: true, 
+      location: true, storeName: true, phone: true, deliveryDay: true, deliveryTime: true,
+      totalOrders: true, totalSpent: true, createdAt: true, provider: true 
+    },
   });
 
   // Limpiar Redis
@@ -170,10 +174,9 @@ router.post('/login', loginLimiter, async (req: Request, res: Response): Promise
     res.json({
       message: '¡Sesión iniciada!',
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatarUrl: user.avatarUrl,
+        id: user.id, username: user.username, email: user.email, avatarUrl: user.avatarUrl,
+        location: user.location, storeName: user.storeName, phone: user.phone, deliveryDay: user.deliveryDay, deliveryTime: user.deliveryTime,
+        totalOrders: user.totalOrders, totalSpent: user.totalSpent, createdAt: user.createdAt, provider: user.provider
       },
     });
   });
@@ -211,17 +214,11 @@ router.post('/google', async (req: Request, res: Response): Promise<void> => {
 
   if (!user) {
     // Generar username único basado en el nombre de Google
-    const baseUsername = (name || email.split('@')[0])
+    const username = (name || email.split('@')[0])
       .toLowerCase()
       .replace(/\s+/g, '_')
       .replace(/[^a-z0-9_]/g, '')
       .slice(0, 18);
-    
-    let username = baseUsername;
-    let counter = 1;
-    while (await prisma.user.findUnique({ where: { username } })) {
-      username = `${baseUsername}${counter++}`;
-    }
 
     user = await prisma.user.create({
       data: {
@@ -249,7 +246,11 @@ router.post('/google', async (req: Request, res: Response): Promise<void> => {
     }
     res.json({
       message: '¡Bienvenido!',
-      user: { id: user!.id, username: user!.username, email: user!.email, avatarUrl: user!.avatarUrl },
+      user: {
+        id: user!.id, username: user!.username, email: user!.email, avatarUrl: user!.avatarUrl,
+        location: user!.location, storeName: user!.storeName, phone: user!.phone, deliveryDay: user!.deliveryDay, deliveryTime: user!.deliveryTime,
+        totalOrders: user!.totalOrders, totalSpent: user!.totalSpent, createdAt: user!.createdAt, provider: user!.provider
+      },
     });
   });
 });
