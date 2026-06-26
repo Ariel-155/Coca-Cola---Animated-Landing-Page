@@ -92,7 +92,7 @@ const PRODUCTS: Product[] = [
     id: 5,
     name: 'Fanta Naranja',
     description: 'Bebida gaseosa sabor a naranja con un sabor divertido y vibrante, ideal para disfrutar con amigos.',
-    image: fantaOrangeImg,
+    image: fantaOrangeImg, 
     nutrients: [
       { nutrient: 'Valor Energético', amount: '55 kcal' },
       { nutrient: 'Grasas Totales', amount: '0 g' },
