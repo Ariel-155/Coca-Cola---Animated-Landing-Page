@@ -9,6 +9,8 @@ export interface AuthUser {
   email: string;
   avatarUrl?: string | null;
   location?: string | null;
+  storeName?: string | null;
+  phone?: string | null;
   deliveryDay?: string | null;
   deliveryTime?: string | null;
   totalOrders: number;

@@ -24,12 +24,16 @@ Queremos generar assets de video/animaciones realistas de Coca-Cola usando IA (c
 npm install
 ```
 
-### Instalar Node_Modules en el frontend:
-```bash
-npm install
-```
-
 ### EL PROYECTO SE INICIA EN LA RAIZ DEL MISMO CON:
 
 ```bash
-npm run dev 
+npm run dev
+```
+
+
+### ES NECESARIO INICIAR PRISMA CON:
+
+```bash
+cd backend
+npx prisma generate
+```

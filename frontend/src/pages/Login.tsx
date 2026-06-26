@@ -14,6 +14,7 @@ export default function Login() {
   const [mode, setMode] = useState<Mode>('login');
   const [step, setStep] = useState<Step>('form');
   const [pendingEmail, setPendingEmail] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Form fields
   const [username, setUsername] = useState('');
@@ -279,11 +280,25 @@ export default function Login() {
                   {mode === 'register' && (
                     <p className="text-gray-600 text-xs mt-1">Mínimo 8 caracteres, una mayúscula y un número.</p>
                   )}
+                  {mode === 'register' && (
+                    <div className="mt-4 flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        id="terms"
+                        checked={acceptedTerms}
+                        onChange={(e) => setAcceptedTerms(e.target.checked)}
+                        className="mt-1 w-4 h-4 bg-black border border-white/20 rounded accent-coca-red"
+                      />
+                      <label htmlFor="terms" className="text-gray-400 text-xs">
+                        Acepto los <Link to="/terminos" target="_blank" className="text-coca-red hover:underline">Términos y Condiciones</Link> y el <Link to="/privacidad" target="_blank" className="text-coca-red hover:underline">Aviso de Privacidad</Link>. Entiendo que este sitio es un trabajo práctico open-source.
+                      </label>
+                    </div>
+                  )}
                 </div>
 
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || (mode === 'register' && !acceptedTerms)}
                   className="w-full bg-coca-red hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-base py-3.5 rounded-xl transition-all duration-200 shadow-[0_0_20px_rgba(244,0,9,0.3)] hover:shadow-[0_0_30px_rgba(244,0,9,0.5)] transform hover:-translate-y-0.5"
                 >
                   {submitting ? (
@@ -305,7 +320,10 @@ export default function Login() {
               </div>
 
               {/* Google Button — div estático, nunca se desmonta */}
-              <div className="flex justify-center w-full min-h-[44px]">
+              <div className="relative flex justify-center w-full min-h-[44px]">
+                {mode === 'register' && !acceptedTerms && (
+                  <div className="absolute inset-0 z-10 bg-black/50 cursor-not-allowed" title="Debes aceptar los términos y condiciones primero." />
+                )}
                 {!googleLoaded && (
                   <div className="w-full h-11 border border-white/10 rounded-full flex items-center justify-center bg-white/5 animate-pulse">
                     <span className="text-gray-500 text-sm">Cargando Google...</span>
@@ -313,7 +331,7 @@ export default function Login() {
                 )}
                 <div
                   ref={googleButtonRef}
-                  className={`w-full flex justify-center ${googleLoaded ? '' : 'hidden'}`}
+                  className={`w-full flex justify-center ${googleLoaded ? '' : 'hidden'} ${mode === 'register' && !acceptedTerms ? 'opacity-50' : ''}`}
                 />
               </div>
             </>

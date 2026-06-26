@@ -4,7 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import cocaOriginal from '../assets/Coca-Cola Sabor Original.png';
 import cocaMenosAzucar from '../assets/Coca-Cola Sabor Original Menos Azúcar.png';
 import cocaSinAzucar from '../assets/Coca-Cola Sin Azúcar.png';
-import logoCompany from '../assets/logo-company.png';
+import spriteImg from '../assets/sprite.png';
+import fantaOrangeImg from '../assets/fanta_orange.png';
+import fantaGrapeImg from '../assets/fanta_grape.png';
+import poweradeBlueImg from '../assets/powerade_blue.png';
+import poweradeRedImg from '../assets/powerade_red.png';
+import aquariusImg from '../assets/aquarius.png';
 
 import './Productos.css';
 
@@ -68,14 +73,101 @@ const PRODUCTS: Product[] = [
     ],
     ingredients: 'Agua carbonatada, colorante caramelo clase IV, acidulantes (ácido fosfórico y citrato de sodio), aromatizantes naturales, edulcorantes (aspartame y acesulfame de potasio) y regulador de acidez (contiene cafeína y fenilalanina).',
   },
+  {
+    id: 4,
+    name: 'Sprite',
+    description: 'La bebida transparente con un refrescante e intenso sabor a lima-limón que quita tu sed al instante.',
+    image: spriteImg,
+    nutrients: [
+      { nutrient: 'Valor Energético', amount: '40 kcal' },
+      { nutrient: 'Grasas Totales', amount: '0 g' },
+      { nutrient: 'Sodio', amount: '20 mg' },
+      { nutrient: 'Carbohidratos Totales', amount: '10 g' },
+      { nutrient: 'Azúcares Totales', amount: '10 g' },
+      { nutrient: 'Proteínas', amount: '0 g' },
+    ],
+    ingredients: 'Agua carbonatada, azúcares, acidulante (ácido cítrico), saborizantes naturales a lima y limón, y regulador de acidez (citrato de sodio).',
+  },
+  {
+    id: 5,
+    name: 'Fanta Naranja',
+    description: 'Bebida gaseosa sabor a naranja con un sabor divertido y vibrante, ideal para disfrutar con amigos.',
+    image: fantaOrangeImg,
+    nutrients: [
+      { nutrient: 'Valor Energético', amount: '55 kcal' },
+      { nutrient: 'Grasas Totales', amount: '0 g' },
+      { nutrient: 'Sodio', amount: '15 mg' },
+      { nutrient: 'Carbohidratos Totales', amount: '14 g' },
+      { nutrient: 'Azúcares Totales', amount: '14 g' },
+      { nutrient: 'Proteínas', amount: '0 g' },
+    ],
+    ingredients: 'Agua carbonatada, azúcares, jugo de naranja, acidulante (ácido cítrico), saborizantes naturales, conservante (benzoato de sodio) y colorantes artificiales.',
+  },
+  {
+    id: 6,
+    name: 'Fanta Uva',
+    description: 'El clásico y atrevido sabor a uva en una bebida gaseosa refrescante y dulce, perfecta para darle color a tu día.',
+    image: fantaGrapeImg,
+    nutrients: [
+      { nutrient: 'Valor Energético', amount: '52 kcal' },
+      { nutrient: 'Grasas Totales', amount: '0 g' },
+      { nutrient: 'Sodio', amount: '10 mg' },
+      { nutrient: 'Carbohidratos Totales', amount: '13 g' },
+      { nutrient: 'Azúcares Totales', amount: '13 g' },
+      { nutrient: 'Proteínas', amount: '0 g' },
+    ],
+    ingredients: 'Agua carbonatada, azúcares, acidulante (ácido cítrico), saborizantes artificiales a uva, conservante (benzoato de sodio) y colorantes artificiales.',
+  },
+  {
+    id: 7,
+    name: 'Powerade Mountain Blast',
+    description: 'Bebida deportiva formulada con el sistema ION4 que ayuda a reponer 4 de los electrolitos que pierdes al sudar.',
+    image: poweradeBlueImg,
+    nutrients: [
+      { nutrient: 'Valor Energético', amount: '24 kcal' },
+      { nutrient: 'Grasas Totales', amount: '0 g' },
+      { nutrient: 'Sodio', amount: '40 mg' },
+      { nutrient: 'Potasio', amount: '12 mg' },
+      { nutrient: 'Carbohidratos Totales', amount: '6 g' },
+      { nutrient: 'Azúcares Totales', amount: '6 g' },
+    ],
+    ingredients: 'Agua, azúcares, acidulante (ácido cítrico), cloruro de sodio, citrato de potasio, saborizantes naturales, cloruro de magnesio, cloruro de calcio y colorante azul.',
+  },
+  {
+    id: 8,
+    name: 'Powerade Fruit Punch',
+    description: 'Recarga tu energía con el delicioso sabor a ponche de frutas y recupera los electrolitos perdidos durante la actividad física.',
+    image: poweradeRedImg,
+    nutrients: [
+      { nutrient: 'Valor Energético', amount: '24 kcal' },
+      { nutrient: 'Grasas Totales', amount: '0 g' },
+      { nutrient: 'Sodio', amount: '40 mg' },
+      { nutrient: 'Potasio', amount: '12 mg' },
+      { nutrient: 'Carbohidratos Totales', amount: '6 g' },
+      { nutrient: 'Azúcares Totales', amount: '6 g' },
+    ],
+    ingredients: 'Agua, azúcares, acidulante (ácido cítrico), cloruro de sodio, citrato de potasio, saborizantes naturales a frutas, cloruro de magnesio y colorante rojo.',
+  },
+  {
+    id: 9,
+    name: 'Aquarius Pera',
+    description: 'Agua saborizada sin gas, ligera y refrescante, con un toque suave a pera y vitaminas esenciales.',
+    image: aquariusImg,
+    nutrients: [
+      { nutrient: 'Valor Energético', amount: '18 kcal' },
+      { nutrient: 'Grasas Totales', amount: '0 g' },
+      { nutrient: 'Sodio', amount: '15 mg' },
+      { nutrient: 'Carbohidratos Totales', amount: '4.5 g' },
+      { nutrient: 'Azúcares Totales', amount: '4.5 g' },
+      { nutrient: 'Vitamina B3', amount: '15% VD' },
+    ],
+    ingredients: 'Agua, azúcares, jugo de pera, acidulante (ácido cítrico), saborizantes naturales, conservante (sorbato de potasio) y vitaminas (B3, B5, B6).',
+  },
 ];
-
-const COUNTRIES = ['Argentina', 'Brasil', 'Chile', 'Colombia', 'México', 'Perú'];
 
 export default function Productos() {
   const [search, setSearch] = useState('');
   const [modalProduct, setModalProduct] = useState<Product | null>(null);
-  const [locationOpen, setLocationOpen] = useState(false);
   const productRefs = useRef<(HTMLElement | null)[]>([]);
 
   const filtered = PRODUCTS.filter(p =>
@@ -195,71 +287,6 @@ export default function Productos() {
       {/* Scroll to top button */}
       <button className="productos-btn-top" onClick={scrollToTop}>↑</button>
 
-      {/* Footer */}
-      <footer className="productos-site-footer">
-        <div className="productos-footer-container">
-          <div className="productos-footer-top">
-            <img src={logoCompany} alt="The Coca-Cola Company" className="productos-footer-logo" />
-            <div className="productos-footer-region-container" style={{ position: 'relative' }}>
-              <div
-                className="productos-footer-region"
-                onClick={() => setLocationOpen(!locationOpen)}
-                style={{ cursor: 'pointer' }}
-              >
-                <span>📍 Perú</span>
-              </div>
-              <div className={`productos-location-dropdown ${locationOpen ? 'productos-dropdown-show' : ''}`}>
-                <div className="productos-dropdown-header">
-                  <h4>Select Your Location</h4>
-                  <span onClick={() => setLocationOpen(false)} style={{ cursor: 'pointer' }}>×</span>
-                </div>
-                <div className="productos-dropdown-content">
-                  {COUNTRIES.map(c => (
-                    <a key={c} href="#">{c}{c === 'Perú' ? ' ✓' : ''}</a>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="productos-footer-main">
-            <div className="productos-footer-col">
-              <h4>SOBRE NOSOTROS</h4>
-              <a href="#">Nuestra empresa</a>
-              <a href="#">Centro de medios</a>
-              <a href="#">Nuestra historia</a>
-            </div>
-            <div className="productos-footer-col">
-              <h4>¿NECESITAS AYUDA?</h4>
-              <a href="#">Mapa del sitio</a>
-              <a href="#">Contacto</a>
-            </div>
-            <div className="productos-footer-col">
-              <h4>LEGAL</h4>
-              <a href="#">Términos de uso</a>
-              <a href="#">Aviso de privacidad</a>
-            </div>
-            <div className="productos-footer-social">
-              <a href="https://www.facebook.com/CocaCola" target="_blank" rel="noopener noreferrer">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-              </a>
-              <a href="https://www.instagram.com/cocacola" target="_blank" rel="noopener noreferrer">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
-              </a>
-              <a href="https://www.youtube.com/user/cocacola" target="_blank" rel="noopener noreferrer">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43zM9.75 15.02V8.48l5.75 3.27-5.75 3.27z"/></svg>
-              </a>
-              <a href="https://www.linkedin.com/company/the-coca-cola-company" target="_blank" rel="noopener noreferrer">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-              </a>
-            </div>
-          </div>
-
-          <div className="productos-footer-bottom">
-            <p>&copy; 2026 The Coca-Cola Company. Reservados todos los derechos.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
