@@ -9,7 +9,10 @@ const router = Router();
 router.use(requireAuth);
 
 const updateProfileSchema = z.object({
+  username: z.string().min(3).max(30).optional(),
   location: z.string().max(100).optional(),
+  storeName: z.string().max(100).optional(),
+  phone: z.string().max(20).optional(),
   deliveryDay: z.enum(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']).optional(),
   deliveryTime: z.string().max(20).optional(),
 });
@@ -20,7 +23,7 @@ router.get('/profile', async (req: Request, res: Response): Promise<void> => {
     where: { id: req.session.userId },
     select: {
       id: true, username: true, email: true, avatarUrl: true,
-      location: true, deliveryDay: true, deliveryTime: true,
+      location: true, storeName: true, phone: true, deliveryDay: true, deliveryTime: true,
       totalOrders: true, totalSpent: true, createdAt: true, provider: true,
     },
   });
@@ -46,8 +49,8 @@ router.patch('/profile', async (req: Request, res: Response): Promise<void> => {
     data: parsed.data,
     select: {
       id: true, username: true, email: true, avatarUrl: true,
-      location: true, deliveryDay: true, deliveryTime: true,
-      totalOrders: true, totalSpent: true,
+      location: true, storeName: true, phone: true, deliveryDay: true, deliveryTime: true,
+      totalOrders: true, totalSpent: true, createdAt: true, provider: true,
     },
   });
 

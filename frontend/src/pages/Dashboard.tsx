@@ -15,6 +15,12 @@ export default function Dashboard() {
   const [location, setLocation] = useState('');
   const [deliveryDay, setDeliveryDay] = useState('');
   const [deliveryTime, setDeliveryTime] = useState('');
+
+  const [editingAccount, setEditingAccount] = useState(false);
+  const [username, setUsername] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [phone, setPhone] = useState('');
+
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
 
@@ -58,6 +64,28 @@ export default function Dashboard() {
       setTimeout(() => setSaveMsg(''), 3000);
     } catch {
       setSaveMsg('No se pudo guardar. Intenta de nuevo.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveAccount = async () => {
+    setSaving(true); setSaveMsg('');
+    try {
+      const res = await fetch(`${API}/user/profile`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, storeName, phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al guardar');
+      await refreshUser();
+      setEditingAccount(false);
+      setSaveMsg('¡Cuenta actualizada con éxito!');
+      setTimeout(() => setSaveMsg(''), 3000);
+    } catch (err: unknown) {
+      setSaveMsg(err instanceof Error ? err.message : 'No se pudo guardar la cuenta.');
     } finally {
       setSaving(false);
     }
@@ -179,28 +207,78 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* Información de cuenta */}
-          <div className="bg-[#111] border border-white/5 rounded-3xl p-6 lg:p-8">
-            <div className="flex items-center justify-between mb-8">
+          <div className="bg-[#111] border border-white/5 rounded-3xl p-6 lg:p-8 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-8 relative z-10">
               <h2 className="text-xl font-black flex items-center gap-3">
                 <div className="w-10 h-10 bg-coca-red/10 text-coca-red rounded-xl flex items-center justify-center">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </div>
                 Información de Cuenta
               </h2>
+              <button
+                onClick={() => {
+                  if (!editingAccount) {
+                    setUsername(user?.username || '');
+                    setStoreName(user?.storeName || '');
+                    setPhone(user?.phone || '');
+                  }
+                  setEditingAccount(!editingAccount);
+                }}
+                className={`text-xs font-black uppercase tracking-wider px-4 py-2 rounded-xl transition-all ${
+                  editingAccount ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-coca-red hover:bg-red-700 text-white shadow-[0_0_15px_rgba(244,0,9,0.3)]'
+                }`}
+              >
+                {editingAccount ? 'Cancelar' : 'Configurar'}
+              </button>
             </div>
-            <div className="space-y-4">
-              {[
-                { label: 'Usuario', value: `@${user.username}` },
-                { label: 'Email', value: user.email },
-                { label: 'ID del Sistema', value: user.id, mono: true },
-              ].map(item => (
-                <div key={item.label} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-black/50 border border-white/5 rounded-2xl">
-                  <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">{item.label}</span>
-                  <span className={`text-white font-medium ${item.mono ? 'font-mono text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-md' : 'text-sm'}`}>
-                    {item.value}
-                  </span>
-                </div>
-              ))}
+            <div className="space-y-4 relative z-10">
+              {/* Usuario */}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-black/50 border border-white/5 rounded-2xl">
+                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Usuario</span>
+                {editingAccount ? (
+                  <input type="text" value={username} onChange={e => setUsername(e.target.value)} className="bg-black border border-white/10 rounded-lg px-3 py-1 text-white text-sm focus:outline-none focus:border-coca-red" />
+                ) : (
+                  <span className="text-white font-medium text-sm">@{user.username}</span>
+                )}
+              </div>
+              {/* Tienda */}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-black/50 border border-white/5 rounded-2xl">
+                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Nombre Tienda</span>
+                {editingAccount ? (
+                  <input type="text" value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Ej: Mi Bodega" className="bg-black border border-white/10 rounded-lg px-3 py-1 text-white text-sm focus:outline-none focus:border-coca-red" />
+                ) : (
+                  <span className="text-white font-medium text-sm">{user.storeName || <span className="text-gray-600 italic">No configurado</span>}</span>
+                )}
+              </div>
+              {/* Teléfono */}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-black/50 border border-white/5 rounded-2xl">
+                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Teléfono</span>
+                {editingAccount ? (
+                  <input type="text" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+51 987 654 321" className="bg-black border border-white/10 rounded-lg px-3 py-1 text-white text-sm focus:outline-none focus:border-coca-red" />
+                ) : (
+                  <span className="text-white font-medium text-sm">{user.phone || <span className="text-gray-600 italic">No configurado</span>}</span>
+                )}
+              </div>
+              {/* Email (Read Only) */}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-black/50 border border-white/5 rounded-2xl">
+                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Email</span>
+                <span className="text-white font-medium text-sm">{user.email}</span>
+              </div>
+              {/* ID del Sistema (Read Only) */}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 bg-black/50 border border-white/5 rounded-2xl">
+                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">ID del Sistema</span>
+                <span className="text-white font-medium font-mono text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-md">{user.id}</span>
+              </div>
+
+              {editingAccount && (
+                <button
+                  onClick={handleSaveAccount}
+                  disabled={saving}
+                  className="w-full bg-gradient-to-r from-coca-red to-red-800 hover:from-red-600 hover:to-coca-red disabled:opacity-50 text-white font-black text-sm uppercase tracking-widest py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(244,0,9,0.3)] hover:shadow-[0_0_20px_rgba(244,0,9,0.5)] mt-4"
+                >
+                  {saving ? 'Guardando...' : 'Guardar Información'}
+                </button>
+              )}
             </div>
           </div>
 

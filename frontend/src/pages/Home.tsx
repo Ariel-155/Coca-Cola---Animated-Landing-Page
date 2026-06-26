@@ -1,8 +1,11 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+
+import { useAuth } from '../context/AuthContext';
 
 import tapChapaMp4 from '../assets/video_secciones/Tap_Chapa.mp4';
 import calles from '../assets/calles/calle11sma.png';
@@ -18,6 +21,9 @@ const FRAME_COUNT2 = FRAME_END2 - FRAME_START2 + 1; // 60 frames
 const FRAME_PREFIX2 = '/frames2/video-coca-cola_';
 
 export default function Home() {
+  const { user, refreshUser } = useAuth();
+  const navigate = useNavigate();
+
   const mainRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -49,9 +55,84 @@ export default function Home() {
   const [isChapaSpinning, setIsChapaSpinning] = useState(false);
   const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 });
 
+  // ── CTA Modal State ──
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [registerUsername, setRegisterUsername] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [ctaStoreName, setCtaStoreName] = useState('');
+  const [ctaEmail, setCtaEmail] = useState('');
+  const [ctaPhone, setCtaPhone] = useState('');
+  const [ctaStep, setCtaStep] = useState<'form' | 'otp'>('form');
+  const [ctaOtp, setCtaOtp] = useState('');
+  const [ctaError, setCtaError] = useState('');
+  const [ctaSuccess, setCtaSuccess] = useState('');
+  const [ctaSubmitting, setCtaSubmitting] = useState(false);
+  const [acceptedTermsModal, setAcceptedTermsModal] = useState(false);
+
+  const handleCTASubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowRegisterModal(true);
+    setCtaStep('form');
+  };
+
+  const handleCtaRegisterInit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCtaError(''); setCtaSuccess(''); setCtaSubmitting(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/auth/register/init`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: registerUsername, email: ctaEmail, password: registerPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setCtaStep('otp');
+      setCtaSuccess('Código enviado. Revisa tu email.');
+    } catch (err: unknown) {
+      setCtaError(err instanceof Error ? err.message : 'Error al iniciar registro');
+    } finally {
+      setCtaSubmitting(false);
+    }
+  };
+
+  const handleCtaRegisterVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCtaError(''); setCtaSubmitting(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/auth/register/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: ctaEmail, otp: ctaOtp }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/user/profile`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ storeName: ctaStoreName, phone: ctaPhone }),
+      });
+
+      await refreshUser();
+      setShowRegisterModal(false);
+      navigate('/dashboard');
+    } catch (err: unknown) {
+      setCtaError(err instanceof Error ? err.message : 'Error al verificar OTP');
+    } finally {
+      setCtaSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
+      const rect = introGifRef.current?.getBoundingClientRect();
+      if (rect) {
+        setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      } else {
+        setMousePos({ x: e.clientX, y: e.clientY });
+      }
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
@@ -431,33 +512,101 @@ export default function Home() {
         className="relative min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-coca-black to-coca-red px-4"
       >
         <div className="max-w-4xl w-full bg-coca-white text-coca-black rounded-3xl shadow-2xl p-8 md:p-12 text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-black mb-4 text-coca-red tracking-tight">
-            POTENCIA TU NEGOCIO
-          </h2>
-          <p className="text-xl md:text-2xl text-gray-800 mb-8 font-medium">
-            ¿Tienes una tienda o bodega? Contáctanos y obtén un{' '}
-            <span className="font-bold text-coca-red bg-red-100 px-2 rounded">12% de descuento</span>{' '}
-            en tu primera compra al por mayor.
-          </p>
-          <form className="flex flex-col gap-4 max-w-md mx-auto text-left">
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Nombre de la Tienda</label>
-              <input type="text" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all" placeholder="Mi Bodega Ejemplar" />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Correo Electrónico</label>
-              <input type="email" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all" placeholder="contacto@mibodega.com" />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Teléfono</label>
-              <input type="tel" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all" placeholder="+51 987 654 321" />
-            </div>
-            <button type="button" className="mt-4 bg-coca-red hover:bg-red-700 text-white font-bold text-lg py-4 rounded-xl transition-all transform hover:scale-105 shadow-lg">
-              Solicitar Contacto y Descuento
-            </button>
-          </form>
+          {user ? (
+            <>
+              <h2 className="text-4xl md:text-5xl font-black mb-4 text-coca-red tracking-tight">
+                ¡HOLA DE NUEVO!
+              </h2>
+              <p className="text-xl md:text-2xl text-gray-800 mb-8 font-medium">
+                Usted ya ha creado su cuenta. Modifique sus datos o revise sus pedidos en el Dashboard.
+              </p>
+              <button onClick={() => navigate('/dashboard')} className="bg-coca-black hover:bg-gray-800 text-white font-bold text-lg px-8 py-4 rounded-xl transition-all transform hover:scale-105 shadow-lg">
+                Ir al Dashboard
+              </button>
+            </>
+          ) : (
+            <>
+              <h2 className="text-4xl md:text-5xl font-black mb-4 text-coca-red tracking-tight">
+                POTENCIA TU NEGOCIO
+              </h2>
+              <p className="text-xl md:text-2xl text-gray-800 mb-8 font-medium">
+                ¿Tienes una tienda o bodega? Contáctanos y obtén un{' '}
+                <span className="font-bold text-coca-red bg-red-100 px-2 rounded">12% de descuento</span>{' '}
+                en tu primera compra al por mayor.
+              </p>
+              <form className="flex flex-col gap-4 max-w-md mx-auto text-left" onSubmit={handleCTASubmit}>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Nombre de la Tienda</label>
+                  <input type="text" required value={ctaStoreName} onChange={e => setCtaStoreName(e.target.value)} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all" placeholder="Mi Bodega Ejemplar" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Correo Electrónico</label>
+                  <input type="email" required value={ctaEmail} onChange={e => setCtaEmail(e.target.value)} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all" placeholder="contacto@mibodega.com" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Teléfono</label>
+                  <input type="tel" required value={ctaPhone} onChange={e => setCtaPhone(e.target.value)} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-coca-red focus:border-transparent transition-all" placeholder="+51 987 654 321" />
+                </div>
+                <button type="submit" className="mt-4 bg-coca-red hover:bg-red-700 text-white font-bold text-lg py-4 rounded-xl transition-all transform hover:scale-105 shadow-lg">
+                  Conectarse a Coca-Cola
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </section>
+
+      {/* CTA Registration Modal */}
+      {showRegisterModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#111] border border-white/10 rounded-3xl p-8 max-w-md w-full relative shadow-[0_20px_60px_rgba(244,0,9,0.2)]">
+            <button onClick={() => setShowRegisterModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
+            <h2 className="text-2xl font-black text-white mb-2">Completa tu registro</h2>
+            <p className="text-gray-500 text-sm mb-6">Falta poco para unirte a nuestra red de socios.</p>
+
+            {ctaError && <div className="bg-red-950 border border-coca-red/50 text-red-300 text-sm rounded-xl p-3 mb-4">{ctaError}</div>}
+            {ctaSuccess && <div className="bg-green-950 border border-green-500/50 text-green-300 text-sm rounded-xl p-3 mb-4">{ctaSuccess}</div>}
+
+            {ctaStep === 'form' ? (
+              <form onSubmit={handleCtaRegisterInit} className="space-y-4 text-left">
+                <div>
+                  <label className="block text-gray-400 text-xs font-bold uppercase tracking-widest mb-1.5">Nombre de usuario</label>
+                  <input type="text" required value={registerUsername} onChange={e => setRegisterUsername(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-coca-red" placeholder="ej: bodega_central" />
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-xs font-bold uppercase tracking-widest mb-1.5">Contraseña</label>
+                  <input type="password" required value={registerPassword} onChange={e => setRegisterPassword(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-coca-red" placeholder="••••••••" />
+                </div>
+                <div className="mt-4 flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="termsModal"
+                    checked={acceptedTermsModal}
+                    onChange={(e) => setAcceptedTermsModal(e.target.checked)}
+                    className="mt-1 w-4 h-4 bg-black border border-white/20 rounded accent-coca-red"
+                  />
+                  <label htmlFor="termsModal" className="text-gray-400 text-xs">
+                    Acepto los <Link to="/terminos" target="_blank" className="text-coca-red hover:underline">Términos y Condiciones</Link> y el <Link to="/privacidad" target="_blank" className="text-coca-red hover:underline">Aviso de Privacidad</Link>. Entiendo que este sitio es un trabajo práctico open-source.
+                  </label>
+                </div>
+                <button type="submit" disabled={ctaSubmitting || !acceptedTermsModal} className="w-full mt-2 bg-coca-red hover:bg-red-700 text-white font-black text-base py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(244,0,9,0.3)] disabled:opacity-50">
+                  {ctaSubmitting ? 'Enviando...' : 'Crear Cuenta'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleCtaRegisterVerify} className="space-y-4 text-left">
+                <div>
+                  <label className="block text-gray-400 text-xs font-bold uppercase tracking-widest mb-1.5">Código OTP de 6 dígitos</label>
+                  <input type="text" required maxLength={6} value={ctaOtp} onChange={e => setCtaOtp(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-center text-2xl tracking-widest text-white focus:outline-none focus:border-coca-red" placeholder="000000" />
+                </div>
+                <button type="submit" disabled={ctaSubmitting || ctaOtp.length !== 6} className="w-full mt-2 bg-coca-red hover:bg-red-700 text-white font-black text-base py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(244,0,9,0.3)] disabled:opacity-50">
+                  {ctaSubmitting ? 'Verificando...' : 'Verificar'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

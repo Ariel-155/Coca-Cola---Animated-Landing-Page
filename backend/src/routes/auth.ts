@@ -58,18 +58,11 @@ router.post('/register/init', otpSendLimiter, async (req: Request, res: Response
 
   const { username, email, password } = parsed.data;
 
-  // Verificar unicidad
-  const [existingEmail, existingUsername] = await Promise.all([
-    prisma.user.findUnique({ where: { email } }),
-    prisma.user.findUnique({ where: { username } }),
-  ]);
+  // Verificar unicidad de email
+  const existingEmail = await prisma.user.findUnique({ where: { email } });
 
   if (existingEmail) {
     res.status(409).json({ error: 'Ya existe una cuenta con ese email.' });
-    return;
-  }
-  if (existingUsername) {
-    res.status(409).json({ error: 'Ese nombre de usuario ya está en uso. Elige otro.' });
     return;
   }
 
@@ -289,6 +282,7 @@ router.get('/me', async (req: Request, res: Response): Promise<void> => {
     select: {
       id: true, username: true, email: true,
       avatarUrl: true, location: true,
+      storeName: true, phone: true,
       deliveryDay: true, deliveryTime: true,
       totalOrders: true, totalSpent: true,
       createdAt: true, provider: true,

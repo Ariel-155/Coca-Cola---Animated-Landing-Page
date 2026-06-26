@@ -12,13 +12,15 @@ datasource db {
 
 model User {
   id           String   @id @default(cuid())
-  username     String   @unique
+  username     String
   email        String   @unique
   password     String?  // null para usuarios OAuth
   provider     String   @default("local") // "local" | "google"
   googleId     String?  @unique
   avatarUrl    String?
   location     String?
+  storeName    String?
+  phone        String?
   deliveryDay  String?  // "Lunes", "Martes", etc.
   deliveryTime String?  // "09:00 - 12:00"
   totalOrders  Int      @default(0)

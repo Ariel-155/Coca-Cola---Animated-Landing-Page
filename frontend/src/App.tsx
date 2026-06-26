@@ -11,6 +11,8 @@ import Mayoristas from './pages/Mayoristas';
 import Productos from './pages/Productos';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -233,11 +235,21 @@ function ContentWrapper() {
           <Route path="/mayoristas" element={<Mayoristas />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/terminos" element={<Terms />} />
+          <Route path="/privacidad" element={<Privacy />} />
         </Routes>
       </div>
       {!isFullPage && (
-        <footer className="bg-coca-black border-t border-coca-red/20 py-8 text-center text-sm text-gray-500">
-          <p>&copy; 2026 Coca-Cola Company. Landing Page Project for Cibertec.</p>
+        <footer className="bg-coca-black border-t border-coca-red/20 py-12 flex flex-col items-center gap-6">
+          <p className="text-gray-400 font-medium">&copy; 2026 The Coca-Cola Company. Reservados todos los derechos.</p>
+          <div className="flex gap-6 text-sm">
+            <Link to="/terminos" className="text-gray-500 hover:text-coca-red transition-colors font-semibold">Términos y Condiciones</Link>
+            <Link to="/privacidad" className="text-gray-500 hover:text-coca-red transition-colors font-semibold">Aviso de Privacidad</Link>
+          </div>
+          <p className="max-w-3xl text-center text-xs text-gray-600 px-6 mt-2 leading-relaxed">
+            <strong>* NOTA IMPORTANTE:</strong> Este sitio es un <strong>TRABAJO PRÁCTICO OPEN-SOURCE</strong> desarrollado con fines educativos y de demostración (Landing Page Project for Cibertec). 
+            <strong> NO TENEMOS NINGUNA AFILIACIÓN, PATROCINIO NI RELACIÓN COMERCIAL CON THE COCA-COLA COMPANY.</strong>
+          </p>
         </footer>
       )}
     </>

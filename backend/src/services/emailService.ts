@@ -20,48 +20,55 @@ export async function sendOtpEmail(email: string, otp: string, username: string)
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
-    <body style="margin:0;padding:0;background-color:#ffffff;font-family:Arial,Helvetica,sans-serif;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff;padding:40px 20px;">
+    <body style="margin:0;padding:0;background-color:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;padding:40px 20px;">
         <tr>
           <td align="center">
-            <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
-              <!-- Header -->
+            <!-- Logo -->
+            <div style="margin-bottom: 30px;">
+              <h1 style="font-size:28px;font-weight:900;color:#f40009;margin:0;text-align:center;">Coca-Cola</h1>
+              <div style="height:3px;width:40px;background-color:#f40009;margin:8px auto 0;"></div>
+            </div>
+
+            <!-- Main Card -->
+            <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background-color:#18181b;border-radius:16px;border:1px solid #27272a;">
               <tr>
-                <td align="center" style="padding-bottom:24px;border-bottom:2px solid #d52b1e;">
-                  <h1 style="font-size:28px;font-weight:bold;color:#d52b1e;margin:0;">Coca-Cola</h1>
-                </td>
-              </tr>
-              <!-- Body -->
-              <tr>
-                <td style="padding:32px 0;">
-                  <p style="color:#333333;font-size:16px;margin:0 0 8px;">Hola <strong>${username}</strong>,</p>
-                  <p style="color:#555555;font-size:15px;line-height:1.6;margin:0 0 24px;">
-                    Hemos recibido una solicitud para verificar tu cuenta. Usa el siguiente codigo de 6 digitos para completar tu registro:
+                <td style="padding:40px 32px;">
+                  <p style="color:#a1a1aa;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;margin:0 0 12px;">Verificación de cuenta</p>
+                  <h2 style="font-size:28px;font-weight:bold;color:#ffffff;margin:0 0 24px;">Hola, <span style="color:#f40009;">\${username}</span></h2>
+                  
+                  <p style="color:#a1a1aa;font-size:15px;line-height:1.6;margin:0 0 32px;">
+                    Tu código de verificación de <strong style="color:#ffffff;">6 dígitos</strong> para completar tu registro es:
                   </p>
-                  <!-- OTP Code -->
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="center" style="padding:20px 0;">
-                        <div style="display:inline-block;background-color:#f5f5f5;border:1px solid #dddddd;border-radius:8px;padding:16px 32px;">
-                          <span style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#333333;font-family:monospace;">${otp}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  </table>
-                  <p style="color:#888888;font-size:13px;line-height:1.5;margin:24px 0 0;text-align:center;">
-                    Este codigo es valido por 3 minutos. Si no solicitaste este codigo, puedes ignorar este mensaje de forma segura.
-                  </p>
-                </td>
-              </tr>
-              <!-- Footer -->
-              <tr>
-                <td style="border-top:1px solid #eeeeee;padding-top:20px;">
-                  <p style="color:#aaaaaa;font-size:12px;margin:0;text-align:center;">
-                    Coca-Cola Landing Page - Proyecto academico Cibertec 2026
+                  
+                  <!-- OTP Box -->
+                  <div style="background-color:#09090b;border:1px solid #f40009;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+                    <span style="font-size:36px;font-weight:bold;letter-spacing:12px;color:#f40009;font-family:monospace;">\${otp}</span>
+                  </div>
+                  
+                  <!-- Warning Box -->
+                  <div style="background-color:#450a0a;border:1px solid #7f1d1d;border-radius:8px;padding:12px;text-align:center;margin-bottom:32px;">
+                    <span style="color:#fca5a5;font-size:13px;">⏱ Este código expira en <strong>3 minutos</strong>. No lo compartas con nadie.</span>
+                  </div>
+
+                  <p style="color:#52525b;font-size:13px;line-height:1.5;margin:0;text-align:center;">
+                    Si no solicitaste este código, ignora este mensaje.
                   </p>
                 </td>
               </tr>
             </table>
+
+            <!-- Footer -->
+            <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;margin-top:24px;">
+              <tr>
+                <td align="center">
+                  <p style="color:#3f3f46;font-size:12px;margin:0;">
+                    &copy; 2026 Coca-Cola Landing Page. Proyecto académico Cibertec.
+                  </p>
+                </td>
+              </tr>
+            </table>
+
           </td>
         </tr>
       </table>
